@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "raylib.h"
 
-#define valorInicial 5
+#define valorInicial 10
 
 typedef struct node Node;
 typedef struct list List;
@@ -48,9 +48,10 @@ struct bloque{
         InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
 
         Vector2 pInicial = { 100.0f, 100.0f };
-        void *ptrPosicionInicial=&pInicial;
+        Vector2 initialPositions[valorInicial];
+        initialPositions[0] = pInicial;
 
-        SetTargetFPS(1);               // Set our game to run at 60 frames-per-second
+        SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
         //--------------------------------------------------------------------------------------
         List *posiciones = newList();
         List *gusano = newList();
@@ -58,10 +59,12 @@ struct bloque{
         Color random1=(Color){ GetRandomValue(0, 255), GetRandomValue(0, 255), GetRandomValue(0, 255), 255 };
         for(int i = 0; i<valorInicial;i++){//inicializar bloque
             addElement(gusano, newBloque(random1,i));
+            initialPositions[i].x = pInicial.x + i;
+            initialPositions[i].y = pInicial.y + i;
         }
 
         for(int i = 0; i<valorInicial;i++){//inicializar posiciones
-            addElement(posiciones, ptrPosicionInicial);
+            addElement(posiciones, initialPositions+i);
         }
 
         Vector2 pMouse;
@@ -80,13 +83,11 @@ struct bloque{
 
             ClearBackground(RAYWHITE);
 
-            DrawText("Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY);
+            DrawText("Slither.io Prueba 626", 400, 400, 40, BLACK);
 
             for(int i=0;i<valorInicial;i++){
                 DrawCircleV(getPosicion(gusano,i), getRadio(gusano,i), getColor(gusano,i));
-                printf("(%f,%f)\n", getPosicion(gusano,i).x,getPosicion(gusano,i).y);
             }
-            printf("\n");
             EndDrawing();
             //----------------------------------------------------------------------------------
         }
@@ -181,7 +182,7 @@ Bloque* newBloque(Color color,int n){
     new->color=color;
     new->alpha=1;
     new->posicion=(Vector2){ 100+5*n, 100 +5*n};
-    new->radio=10;
+    new->radio=20;
     return new;
 }
 
@@ -197,6 +198,9 @@ void updateListaP(List* posiciones,Vector2 mouse){
         tmp2=*vec;
         *vec=tmp1;
 
+        if(focus->next==NULL){
+            break;
+        }
         i++;
         focus=focus->next;
         vec=focus->value;
