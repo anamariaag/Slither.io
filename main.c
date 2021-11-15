@@ -14,13 +14,14 @@ float getRadio(List* gusano,int index);
 Vector2 getPosicion(List* gusano,int index);
 void setPosicion(List* gusano, int index, Vector2 pos);
 Bloque* newBloque(Color color,int n);
+Vector2 *newPos(float x, float y);
 void inicializarBloque(Vector2 initialPositions[valorInicial], List *gusano);
 void inicializarPosiciones(List *posiciones,Vector2 initialPositions[valorInicial],Vector2 pInicial);
 void updateListaP(List* posiciones, Vector2 mouse);
 void updateGusano(List *gusano,List* posiciones);
 int getSize(List *gusano);
 
-void food(List *gusano,Vector2 *randomPos, Color randomColor);
+void food(List *gusano,List *posiciones,Vector2 *randomPos, Color randomColor);
 
 Vector2 getRandomVector2();
 Color getRandomColor();
@@ -58,7 +59,7 @@ struct bloque{
         Vector2 initialPositions[valorInicial];
         initialPositions[0] = pInicial;
 
-        SetTargetFPS(1);               // Set our game to run at 60 frames-per-second
+        SetTargetFPS(30);               // Set our game to run at 60 frames-per-second
         //--------------------------------------------------------------------------------------
         List *posiciones = newList();
         List *gusano = newList();
@@ -98,7 +99,7 @@ struct bloque{
 
 
             //addElement(gusano, newBloque(getColor(gusano,0),1));
-            food(gusano,&randomCircle1,randomColor1);
+            food(gusano,posiciones, &randomCircle1,randomColor1);
             //food(gusano,&randomCircle2,randomColor1);
 
             EndDrawing();
@@ -142,6 +143,12 @@ Bloque* newBloque(Color color,int n){
     return new;
 }
 
+Vector2 *newPos(float x, float y){
+    Vector2 *new=malloc(sizeof (Vector2));
+    new->x=x;
+    new->y=y;
+    return new;
+    }
 
 void removeLastElement(List *list){
     Node *focusNode = list->head;
@@ -267,10 +274,11 @@ void updateGusano(List *gusano,List *posiciones){
 
 
 
-void food(List *gusano,Vector2 *randomPos, Color randomColor){
+void food(List *gusano,List *posiciones,Vector2 *randomPos, Color randomColor){
     if(CheckCollisionCircles(getPosicion(gusano,0), getRadio(gusano,0),*randomPos,10)){
         printf("Entro");
-        addElement(gusano, (void*)newBloque(randomColor,1));
+        addElement(gusano, newBloque(getColor(gusano,0),1));
+        addElement(posiciones, newPos(randomPos->x,randomPos->y));
         *randomPos=getRandomVector2();
     }
     else{
