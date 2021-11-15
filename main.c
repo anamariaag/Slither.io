@@ -3,6 +3,7 @@
 #include "raylib.h"
 
 #define valorInicial 5
+#define nFood 50
 
 typedef struct node Node;
 typedef struct list List;
@@ -13,15 +14,17 @@ Color getColor(List* gusano, int index);
 float getRadio(List* gusano,int index);
 Vector2 getPosicion(List* gusano,int index);
 void setPosicion(List* gusano, int index, Vector2 pos);
-Bloque* newBloque(Color color,int n);
+Bloque *newBloque(Color color,int n);
 Vector2 *newPos(float x, float y);
 void inicializarBloque(Vector2 initialPositions[valorInicial], List *gusano);
 void inicializarPosiciones(List *posiciones,Vector2 initialPositions[valorInicial],Vector2 pInicial);
 void updateListaP(List* posiciones, Vector2 mouse);
+//Vector2 mouseMovement(Vector2 mouse);
 void updateGusano(List *gusano,List* posiciones);
-int getSize(List *gusano);
+
 
 void food(List *gusano,List *posiciones,Vector2 *randomPos, Color randomColor);
+void foodPrep(Color foods[],Vector2 positions[],int n);
 
 Vector2 getRandomVector2();
 Color getRandomColor();
@@ -30,6 +33,8 @@ List *newList();
 void addElement(List *list,void* value);
 void removeLastElement(List *list);
 void* getElement(List* list,int index);
+int getSize(List *gusano);
+
 
 struct node{
     void* value;
@@ -55,6 +60,11 @@ struct bloque{
 
         InitWindow(screenWidth, screenHeight, "Sliter.io -- Ana y Valeria");
 
+        Color foods[nFood];
+        Vector2 randomCircles[nFood];
+        foodPrep(foods,randomCircles,nFood);
+
+
         Vector2 pInicial = { 100.0f, 100.0f };
         Vector2 initialPositions[valorInicial];
         initialPositions[0] = pInicial;
@@ -67,9 +77,8 @@ struct bloque{
         inicializarBloque(initialPositions,gusano);
         inicializarPosiciones(posiciones,initialPositions,pInicial);
 
-        Vector2 randomCircle1 = getRandomVector2();
-        Vector2 randomCircle2 = getRandomVector2();
-        Color randomColor1 = getRandomColor();
+
+
 
         // Main game loop
         while (!WindowShouldClose())    // Detect window close button or ESC key
@@ -89,18 +98,13 @@ struct bloque{
             DrawText("Slither.io Prueba 626", 400, 400, 40, BLACK);
 
 
-            DrawCircleV(randomCircle1,10,randomColor1);
-
-
-
             for(int i=0;i<getSize(gusano);i++){
                 DrawCircleV(getPosicion(gusano,i), getRadio(gusano,i), getColor(gusano,i));
             }
 
-
-            //addElement(gusano, newBloque(getColor(gusano,0),1));
-            food(gusano,posiciones, &randomCircle1,randomColor1);
-            //food(gusano,&randomCircle2,randomColor1);
+            for(int i =0; i<nFood;i++){
+                food(gusano,posiciones, randomCircles+i, foods[i]);
+            }
 
             EndDrawing();
             //----------------------------------------------------------------------------------
@@ -134,7 +138,23 @@ void addElement(List *list,void* value){
     list->head=new;
     list->size++;
 }
-Bloque* newBloque(Color color,int n){
+
+void removeLastElement(List *list){
+    Node *focusNode = list->head;
+    while (focusNode->next->next!= NULL) {
+        focusNode = focusNode->next;
+    }
+    Node *elementDelete = focusNode->next;
+    focusNode->next = NULL;
+    free(elementDelete);
+    list->size--;
+}
+
+int getSize(List *list) {
+    return list->size;
+}
+
+Bloque *newBloque(Color color,int n){
     Bloque* new=malloc(sizeof(Bloque));
     new->color=color;
     new->alpha=1;
@@ -150,25 +170,11 @@ Vector2 *newPos(float x, float y){
     return new;
     }
 
-void removeLastElement(List *list){
-    Node *focusNode = list->head;
-    while (focusNode->next->next!= NULL) {
-        focusNode = focusNode->next;
-    }
-    Node *elementDelete = focusNode->next;
-    focusNode->next = NULL;
-    free(elementDelete);
-    list->size--;
-}
 
-
-int getSize(List *list) {
-    return list->size;
-}
 
 
 Vector2 getRandomVector2(){
-        Vector2 n = {GetRandomValue(0,1800), GetRandomValue(0,900)};
+        Vector2 n = {GetRandomValue(5,1795), GetRandomValue(5,895)};
         return n;
     }
 
@@ -266,23 +272,29 @@ void updateListaP(List* posiciones,Vector2 mouse){
     }
 }
 
+//Vector2 mouseMovement(Vector2 mouse){}
+
 void updateGusano(List *gusano,List *posiciones){
     for(int i =0; i<gusano->size;i++){
         setPosicion(gusano,i,*(Vector2*)getElement(posiciones,i));
     }
 }
 
-
-
 void food(List *gusano,List *posiciones,Vector2 *randomPos, Color randomColor){
     if(CheckCollisionCircles(getPosicion(gusano,0), getRadio(gusano,0),*randomPos,10)){
-        printf("Entro");
         addElement(gusano, newBloque(getColor(gusano,0),1));
-        addElement(posiciones, newPos(randomPos->x,randomPos->y));
+        addElement(posiciones, newPos(getPosicion(gusano, 1).x,getPosicion(gusano, 1).y));
         *randomPos=getRandomVector2();
     }
     else{
         DrawCircleV(*randomPos,10,randomColor);
     }
+}
+
+void foodPrep(Color foods[], Vector2 positions[],int n){
+     for(int i=0;i<n;i++){
+         foods[i]=getRandomColor();
+         positions[i]=getRandomVector2();
+     }
 }
 
