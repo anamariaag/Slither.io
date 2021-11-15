@@ -14,9 +14,10 @@ float getRadio(List* gusano,int index);
 Vector2 getPosicion(List* gusano,int index);
 void setPosicion(List* gusano, int index, Vector2 pos);
 Bloque* newBloque(Color color,int n);
+void inicializarBloque(Vector2 initialPositions[valorInicial], List *gusano, Vector2 pInicial);
+void inicializarPosiciones(List *posiciones,Vector2 initialPositions[valorInicial]);
 void updateListaP(List* posiciones, Vector2 mouse);
 void updateGusano(List *gusano,List* posiciones);
-void copyData(List *list, Vector2 mouse);
 
 List *newList();
 void addElement(List *list,void* value);
@@ -45,7 +46,7 @@ struct bloque{
         int screenWidth = GetScreenWidth();
         int screenHeight = GetScreenHeight();
 
-        InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
+        InitWindow(screenWidth, screenHeight, "Sliter.io -- Ana y Valeria");
 
         Vector2 pInicial = { 100.0f, 100.0f };
         Vector2 initialPositions[valorInicial];
@@ -56,18 +57,9 @@ struct bloque{
         List *posiciones = newList();
         List *gusano = newList();
 
-        Color random1=(Color){ GetRandomValue(0, 255), GetRandomValue(0, 255), GetRandomValue(0, 255), 255 };
-        for(int i = 0; i<valorInicial;i++){//inicializar bloque
-            addElement(gusano, newBloque(random1,i));
-            initialPositions[i].x = pInicial.x + i;
-            initialPositions[i].y = pInicial.y + i;
-        }
+        inicializarBloque(initialPositions,gusano,pInicial);
+        inicializarPosiciones(posiciones,initialPositions);
 
-        for(int i = 0; i<valorInicial;i++){//inicializar posiciones
-            addElement(posiciones, initialPositions+i);
-        }
-
-        Vector2 pMouse;
         // Main game loop
         while (!WindowShouldClose())    // Detect window close button or ESC key
         {
@@ -186,6 +178,22 @@ Bloque* newBloque(Color color,int n){
     return new;
 }
 
+void inicializarBloque(Vector2 initialPositions[valorInicial], List *gusano, Vector2 pInicial){
+    Color random1=(Color){ GetRandomValue(0, 255), GetRandomValue(0, 255), GetRandomValue(0, 255), 255 };
+    for(int i = 0; i<valorInicial;i++){//inicializar bloque
+        addElement(gusano, newBloque(random1,i));
+        initialPositions[i].x = pInicial.x + i;
+        initialPositions[i].y = pInicial.y + i;
+    }
+}
+
+void inicializarPosiciones(List *posiciones, Vector2 initialPositions[valorInicial]){
+    for(int i = 0; i<valorInicial;i++){//inicializar posiciones
+        addElement(posiciones, initialPositions+i);
+    }
+
+}
+
 void updateListaP(List* posiciones,Vector2 mouse){
     Node* focus=posiciones->head;
     Vector2 *vec=focus->value;
@@ -210,12 +218,7 @@ void updateListaP(List* posiciones,Vector2 mouse){
 }
 
 void updateGusano(List *gusano,List *posiciones){
-    /*for(int i =0; i<gusano->size;i++){
-        setPosicion(gusano,i, *(Vector2*)getElement(posiciones,i));
-    }*/
     for(int i =0; i<gusano->size;i++){
         setPosicion(gusano,i,*(Vector2*)getElement(posiciones,i));
     }
-
-
 }
