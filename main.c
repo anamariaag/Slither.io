@@ -21,8 +21,7 @@ void inicializarBloque(Vector2 initialPositions[valorInicial], List *gusano);
 void inicializarPosiciones(List *posiciones,Vector2 initialPositions[valorInicial],Vector2 pInicial);
 void updateListaP(List* posiciones, Vector2 mouse);
 Vector2 mouseMovement(Vector2 mouse, List *posiciones);
-Vector2 mouseProporcional(Vector2 n);
-//Vector2 Vector2Unitario(Vector2 n);
+Vector2 Vector2Transformacion(Vector2 n);
 void updateGusano(List *gusano,List* posiciones);
 
 
@@ -135,11 +134,9 @@ struct bloque{
             for(int i =0; i<nFood;i++){
                 food(gusano,posiciones, randomCircles+i, foods[i]);
             }
-            printf("[%f,%f]\n",GetMousePosition().x,GetMousePosition().y);
+
 
             EndMode2D();
-
-
 
             DrawText("Slither.io Prueba 626", 100, 100, 40, BLACK);
 
@@ -210,10 +207,8 @@ Vector2 *newPos(float x, float y){
     }
 
 
-
-
 Vector2 getRandomVector2(){
-        Vector2 n = {GetRandomValue(-2000,2000), GetRandomValue(-2000,2000)};
+        Vector2 n = {GetRandomValue(-1100,2900), GetRandomValue(-1550,2450)};
         return n;
     }
 
@@ -312,20 +307,17 @@ void updateListaP(List* posiciones,Vector2 mouse){
 }
 
 Vector2 mouseMovement(Vector2 mouse,List *posiciones){
-    //Vector2 direction = Vector2Multiply(*((Vector2*)getElement(posiciones,0)),Vector2Unitario(mouse));
-    Vector2 direction=Vector2MoveTowards(*((Vector2*)getElement(posiciones,0)), mouseProporcional(mouse),100);
+    Vector2 direction= Vector2Add(Vector2Transformacion(mouse),*((Vector2*)getElement(posiciones,0)));
     return direction;
 }
 
-Vector2 mouseProporcional(Vector2 n){
-    Vector2 result={(n.x)*2.2,n.y*4.4};
-    return result;
+Vector2 Vector2Transformacion(Vector2 n){
+    n.x=n.x-900;
+    n.y=n.y-400;
+    Vector2 resultado = {n.x/ Vector2Length(n),n.y/ Vector2Length(n)};//calcular unitario
+    return Vector2Scale(resultado,7);
 }
 
-/*Vector2 Vector2Unitario(Vector2 n){
-    Vector2 result={n.x/Vector2Length(n),n.y/Vector2Length(n)};
-    return result;
-}*/
 void updateGusano(List *gusano,List *posiciones){
     for(int i =0; i<gusano->size;i++){
         setPosicion(gusano,i,*(Vector2*)getElement(posiciones,i));
