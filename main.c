@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "raylib.h"
+#include "raymath.h"
 
 #define valorInicial 5
-#define nFood 50
+#define nFood 400
 
 typedef struct node Node;
 typedef struct list List;
@@ -19,7 +20,9 @@ Vector2 *newPos(float x, float y);
 void inicializarBloque(Vector2 initialPositions[valorInicial], List *gusano);
 void inicializarPosiciones(List *posiciones,Vector2 initialPositions[valorInicial],Vector2 pInicial);
 void updateListaP(List* posiciones, Vector2 mouse);
-//Vector2 mouseMovement(Vector2 mouse);
+Vector2 mouseMovement(Vector2 mouse, List *posiciones);
+Vector2 mouseProporcional(Vector2 n);
+//Vector2 Vector2Unitario(Vector2 n);
 void updateGusano(List *gusano,List* posiciones);
 
 
@@ -77,7 +80,11 @@ struct bloque{
         inicializarBloque(initialPositions,gusano);
         inicializarPosiciones(posiciones,initialPositions,pInicial);
 
-
+        Camera2D camera = { 0 };
+        camera.target = (Vector2){getPosicion(gusano,1).x + 20.0f, getPosicion(gusano,1).y + 20.0f };
+        camera.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f };
+        camera.rotation = 0.0f;
+        camera.zoom = 1.0f;
 
 
         // Main game loop
@@ -86,17 +93,40 @@ struct bloque{
             // Update
             //----------------------------------------------------------------------------------
             // TODO: Update your variables here
-            updateListaP(posiciones, GetMousePosition());//agrega nueva posicion mouse y quita ultima
+            updateListaP(posiciones, mouseMovement(GetMousePosition(),posiciones));//agrega nueva posicion mouse y quita ultima
             updateGusano(gusano,posiciones);//copia lista de posiciones a posiciones de los bloques
+
+            // Camera target follows player
+            camera.target = (Vector2 ){getPosicion(gusano,1).x + 20.0f, getPosicion(gusano,1).y + 20.0f };
+
+
+            /* NOTA: vamos a cambiar el zoom conforme el gusano crezca
+            // Camera zoom controls
+            camera.zoom += ((float)GetMouseWheelMove()*0.05f);
+
+            if (camera.zoom > 3.0f) camera.zoom = 3.0f;
+            else if (camera.zoom < 0.1f) camera.zoom = 0.1f;
+
+            // Camera reset (zoom and rotation)
+            if (IsKeyPressed(KEY_R))
+            {
+                camera.zoom = 1.0f;
+                camera.rotation = 0.0f;
+            }*/
+
             //----------------------------------------------------------------------------------
             // Draw
             //----------------------------------------------------------------------------------
             BeginDrawing();
 
             ClearBackground(RAYWHITE);
+            BeginMode2D(camera);
 
-            DrawText("Slither.io Prueba 626", 400, 400, 40, BLACK);
+            DrawCircle(screenWidth/2, screenHeight/2, 2000, LIGHTGRAY);
 
+
+            DrawLine((int)camera.target.x, -screenHeight*10, (int)camera.target.x, screenHeight*10, BLACK);
+            DrawLine(-screenWidth*10, (int)camera.target.y, screenWidth*10, (int)camera.target.y, BLACK);
 
             for(int i=0;i<getSize(gusano);i++){
                 DrawCircleV(getPosicion(gusano,i), getRadio(gusano,i), getColor(gusano,i));
@@ -105,6 +135,15 @@ struct bloque{
             for(int i =0; i<nFood;i++){
                 food(gusano,posiciones, randomCircles+i, foods[i]);
             }
+            printf("[%f,%f]\n",GetMousePosition().x,GetMousePosition().y);
+
+            EndMode2D();
+
+
+
+            DrawText("Slither.io Prueba 626", 100, 100, 40, BLACK);
+
+            //NOTA: Agregar mapa que muestre donde se encuentra el gusano, usar proporciones
 
             EndDrawing();
             //----------------------------------------------------------------------------------
@@ -174,7 +213,7 @@ Vector2 *newPos(float x, float y){
 
 
 Vector2 getRandomVector2(){
-        Vector2 n = {GetRandomValue(5,1795), GetRandomValue(5,895)};
+        Vector2 n = {GetRandomValue(-2000,2000), GetRandomValue(-2000,2000)};
         return n;
     }
 
@@ -272,8 +311,21 @@ void updateListaP(List* posiciones,Vector2 mouse){
     }
 }
 
-//Vector2 mouseMovement(Vector2 mouse){}
+Vector2 mouseMovement(Vector2 mouse,List *posiciones){
+    //Vector2 direction = Vector2Multiply(*((Vector2*)getElement(posiciones,0)),Vector2Unitario(mouse));
+    Vector2 direction=Vector2MoveTowards(*((Vector2*)getElement(posiciones,0)), mouseProporcional(mouse),100);
+    return direction;
+}
 
+Vector2 mouseProporcional(Vector2 n){
+    Vector2 result={(n.x)*2.2,n.y*4.4};
+    return result;
+}
+
+/*Vector2 Vector2Unitario(Vector2 n){
+    Vector2 result={n.x/Vector2Length(n),n.y/Vector2Length(n)};
+    return result;
+}*/
 void updateGusano(List *gusano,List *posiciones){
     for(int i =0; i<gusano->size;i++){
         setPosicion(gusano,i,*(Vector2*)getElement(posiciones,i));
