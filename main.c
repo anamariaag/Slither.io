@@ -23,6 +23,8 @@ void updateListaP(List* posiciones, Vector2 mouse);
 Vector2 mouseMovement(Vector2 mouse, List *posiciones);
 Vector2 Vector2Transformacion(Vector2 n);
 void updateGusano(List *gusano,List* posiciones);
+void updatePosFakeGusano(List* posiciones, Vector2 *pos);
+int compareVector2(Vector2 a, Vector2 b);
 
 
 void gameState(List *gusano);
@@ -67,21 +69,31 @@ struct bloque{
 
         InitWindow(screenWidth, screenHeight, "Sliter.io -- Ana y Valeria");
 
+
         Color foods[nFood];
         Vector2 randomCircles[nFood];//centro
         Vector2 randomCircles2[nFood];//toda la pantalla
         foodPrep(foods,randomCircles,randomCircles2,nFood);
 
-
+        Vector2 fakeGusanoPos = {1000,1000};
         Vector2 pInicial = { 100.0f, 100.0f };
         Vector2 initialPositions[valorInicial];
         initialPositions[0] = pInicial;
 
+        Vector2 initialPositionsFake[valorInicial];
+        initialPositionsFake[0] = pInicial;
+
         SetTargetFPS(30);               // Set our game to run at 60 frames-per-second
         //--------------------------------------------------------------------------------------
+
+        List *posicionesFakeGusano = newList();
+        List *fakeGusano = newList();
+        inicializarBloque(initialPositionsFake,posicionesFakeGusano);
+        inicializarPosiciones(fakeGusano,initialPositionsFake,fakeGusanoPos);
+
+
         List *posiciones = newList();
         List *gusano = newList();
-
         inicializarBloque(initialPositions,gusano);
         inicializarPosiciones(posiciones,initialPositions,pInicial);
 
@@ -89,7 +101,7 @@ struct bloque{
         camera.target = (Vector2){getPosicion(gusano,1).x + 20.0f, getPosicion(gusano,1).y + 20.0f };
         camera.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f };
         camera.rotation = 0.0f;
-        camera.zoom = 1.0f;
+        camera.zoom = 0.2f;
 
 
         // Main game loop
@@ -100,6 +112,9 @@ struct bloque{
             // TODO: Update your variables here
             updateListaP(posiciones, mouseMovement(GetMousePosition(),posiciones));//agrega nueva posicion mouse y quita ultima
             updateGusano(gusano,posiciones);//copia lista de posiciones a posiciones de los bloques
+
+            updatePosFakeGusano(fakeGusano,&fakeGusanoPos);
+            updateGusano(fakeGusano,posicionesFakeGusano);
 
             // Camera target follows player
             camera.target = (Vector2 ){getPosicion(gusano,1).x + 20.0f, getPosicion(gusano,1).y + 20.0f };
@@ -122,10 +137,7 @@ struct bloque{
             // Draw
             //----------------------------------------------------------------------------------
             BeginDrawing();
-
             ClearBackground(RAYWHITE);
-
-
             BeginMode2D(camera);
 
             //CIRCULO DE JUEGO
@@ -133,7 +145,13 @@ struct bloque{
 
             //CUERPO GUSANO
             for(int i=0;i<getSize(gusano);i++){
+                DrawCircleV(getPosicion(gusano,i), (getRadio(gusano,i))+2, BLACK);
                 DrawCircleV(getPosicion(gusano,i), getRadio(gusano,i), getColor(gusano,i));
+            }
+            //cuerpo gusano fake
+            for(int i=0;i<getSize(fakeGusano);i++){
+                DrawCircleV(getPosicion(fakeGusano,i), (getRadio(fakeGusano,i))+2, BLACK);
+                DrawCircleV(getPosicion(fakeGusano,i), getRadio(fakeGusano,i), getColor(fakeGusano,i));
             }
 
             //COMIDA
@@ -338,6 +356,20 @@ void updateGusano(List *gusano,List *posiciones){
 }
 
 
+void updatePosFakeGusano(List* posiciones, Vector2 *pos){
+    Vector2* posGusano = (Vector2*)posiciones->head->value;
+    *posGusano= Vector2Add(*posGusano,Vector2Normalize(Vector2Subtract(*pos,*posGusano)));
+    if(compareVector2(*pos, *posGusano)){
+        *pos=getRandomPos2();
+    }
+}
+
+int compareVector2(Vector2 a, Vector2 b){
+        if (a.x==b.x  && a.y==b.y){
+            return 1;
+        }
+        return 0;
+    }
 
 
 void food1(List *gusano,List *posiciones,Vector2 *randomPos, Color randomColor){
@@ -383,7 +415,7 @@ void gameState(List *gusano)
     DrawText("Slither.io Prueba 626", 100, 100, 40, BLACK);
 
     //SCORE
-    DrawText(TextFormat("Score: %d", getSize(gusano)),50,640,30,RED);
+    DrawText(TextFormat("Score: %d", getSize(gusano)-10),50,640,30,RED);
 
     //MAPA
     DrawCircle(120, 780, 103, BLACK);
