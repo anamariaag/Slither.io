@@ -5,6 +5,8 @@
 
 #define valorInicial 10
 #define nFood 400
+#define nGusanos 20
+#define worldSize 6000
 
 typedef struct node Node;
 typedef struct list List;
@@ -23,19 +25,19 @@ void updateListaP(List* posiciones, Vector2 mouse);
 Vector2 mouseMovement(Vector2 mouse, List *posiciones);
 Vector2 Vector2Transformacion(Vector2 n);
 void updateGusano(List *gusano,List* posiciones);
-void updatePosFakeGusano(List* posiciones, Vector2 *pos);
+Vector2 updatePosFakeGusano(List* posiciones, Vector2 *pos);
+void inicializarFakeGusanos(List *fakeGusanos[],List *posicionesFakeGusanos[],Vector2 randomPos[nGusanos][valorInicial]);
 int compareVector2(Vector2 a, Vector2 b);
 
 
 void gameState(List *gusano);
 void gameplayer(List *gusano);
 
-void food1(List *gusano,List *posiciones,Vector2 *randomPos, Color randomColor);
-void food2(List *gusano,List *posiciones,Vector2 *randomPos, Color randomColor);
+void checkCollisionFood(List *gusano, List *posiciones, List* fakeGusanos[], List *fakeGusanosPos[],Vector2 randomPosTodo[],Vector2 randomPosCentro[],Color random[]);
 void foodPrep(Color foods[],Vector2 positionsCentro[], Vector2 positionsAll[],int n);
 
-Vector2 getRandomPos1();
-Vector2 getRandomPos2();
+Vector2 getRandomPosTodo();
+Vector2 getRandomPosCentro();
 Color getRandomColor();
 
 List *newList();
@@ -71,25 +73,18 @@ struct bloque{
 
 
         Color foods[nFood];
-        Vector2 randomCircles[nFood];//centro
-        Vector2 randomCircles2[nFood];//toda la pantalla
-        foodPrep(foods,randomCircles,randomCircles2,nFood);
+        Vector2 randomCirclesCentro[nFood];//centro
+        Vector2 randomCirclesTodo[nFood];//toda la pantalla
+        foodPrep(foods,randomCirclesCentro,randomCirclesTodo,nFood);
 
-        Vector2 fakeGusanoPos = {1000,1000};
+
         Vector2 pInicial = { 100.0f, 100.0f };
         Vector2 initialPositions[valorInicial];
         initialPositions[0] = pInicial;
 
-        Vector2 initialPositionsFake[valorInicial];
-        initialPositionsFake[0] = pInicial;
 
         SetTargetFPS(30);               // Set our game to run at 60 frames-per-second
         //--------------------------------------------------------------------------------------
-
-        List *posicionesFakeGusano = newList();
-        List *fakeGusano = newList();
-        inicializarBloque(initialPositionsFake,posicionesFakeGusano);
-        inicializarPosiciones(fakeGusano,initialPositionsFake,fakeGusanoPos);
 
 
         List *posiciones = newList();
@@ -97,12 +92,23 @@ struct bloque{
         inicializarBloque(initialPositions,gusano);
         inicializarPosiciones(posiciones,initialPositions,pInicial);
 
+
+        Vector2 randomPosF[nGusanos][valorInicial];
+        List* fGusano[nGusanos];
+        List* fGusanoPos[nGusanos];
+        inicializarFakeGusanos(fGusano,fGusanoPos,randomPosF);
+
+
         Camera2D camera = { 0 };
         camera.target = (Vector2){getPosicion(gusano,1).x + 20.0f, getPosicion(gusano,1).y + 20.0f };
         camera.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f };
         camera.rotation = 0.0f;
-        camera.zoom = 0.2f;
+        camera.zoom = 0.15f;
 
+        Vector2 fakeGusanoPos[nGusanos];
+        for(int i=0;i<nGusanos;i++){
+            fakeGusanoPos[i]=getRandomPosTodo();
+        }
 
         // Main game loop
         while (!WindowShouldClose())    // Detect window close button or ESC key
@@ -113,11 +119,14 @@ struct bloque{
             updateListaP(posiciones, mouseMovement(GetMousePosition(),posiciones));//agrega nueva posicion mouse y quita ultima
             updateGusano(gusano,posiciones);//copia lista de posiciones a posiciones de los bloques
 
-            updatePosFakeGusano(fakeGusano,&fakeGusanoPos);
-            updateGusano(fakeGusano,posicionesFakeGusano);
+            for(int i =0; i<nGusanos;i++){
+                updateListaP(fGusanoPos[i],updatePosFakeGusano(fGusanoPos[i],&fakeGusanoPos[i]));
+                updateGusano(fGusano[i],fGusanoPos[i]);
+            }
+
 
             // Camera target follows player
-            camera.target = (Vector2 ){getPosicion(gusano,1).x + 20.0f, getPosicion(gusano,1).y + 20.0f };
+            camera.target = (Vector2 ){getPosicion(gusano,1).x , getPosicion(gusano,1).y};
 
             /* NOTA: vamos a cambiar el zoom conforme el gusano crezca
             // Camera zoom controls
@@ -141,24 +150,25 @@ struct bloque{
             BeginMode2D(camera);
 
             //CIRCULO DE JUEGO
-            DrawCircle(screenWidth/2, screenHeight/2, 4000, LIGHTGRAY);
+            DrawCircle(0, 0, worldSize+20, LIGHTGRAY);
 
             //CUERPO GUSANO
             for(int i=0;i<getSize(gusano);i++){
-                DrawCircleV(getPosicion(gusano,i), (getRadio(gusano,i))+2, BLACK);
+                DrawCircleV(getPosicion(gusano,i), (getRadio(gusano,i))+2, DARKGRAY);
                 DrawCircleV(getPosicion(gusano,i), getRadio(gusano,i), getColor(gusano,i));
             }
-            //cuerpo gusano fake
-            for(int i=0;i<getSize(fakeGusano);i++){
-                DrawCircleV(getPosicion(fakeGusano,i), (getRadio(fakeGusano,i))+2, BLACK);
-                DrawCircleV(getPosicion(fakeGusano,i), getRadio(fakeGusano,i), getColor(fakeGusano,i));
+
+            //CUERPO GUSANO FAKE
+            for(int j=0;j<nGusanos;j++){
+                for(int i=0;i<getSize(fGusano[j]);i++){
+                    DrawCircleV(getPosicion(fGusano[j],i), (getRadio(fGusano[j],i))+2, DARKGRAY);
+                    DrawCircleV(getPosicion(fGusano[j],i), getRadio(fGusano[j],i), getColor(fGusano[j],i));
+                }
             }
 
+
             //COMIDA
-            for(int i =0; i<nFood;i++){
-                food1(gusano,posiciones, randomCircles+i, foods[i]);
-                food2(gusano,posiciones,randomCircles2+i,foods[i]);
-            }
+            checkCollisionFood(gusano, posiciones, fGusano,fGusanoPos,randomCirclesTodo,randomCirclesCentro,foods);
 
             gameplayer(gusano);
 
@@ -231,13 +241,20 @@ Vector2 *newPos(float x, float y){
     }
 
 
-Vector2 getRandomPos1(){
-        Vector2 n = {GetRandomValue(-3100,4900), GetRandomValue(-3550,4450)};
+
+
+Vector2 getRandomPosTodo(){
+    Vector2 n;
+    do{
+        n.x = GetRandomValue((-1)*worldSize, worldSize);
+        n.y=GetRandomValue((-1)*worldSize, worldSize);
+    }
+    while ((n.x * n.x) + (n.y * n.y) > (worldSize * worldSize));
         return n;
     } //toda la pantalla
 
-Vector2 getRandomPos2(){
-    Vector2 n = {GetRandomValue(-1100,2900), GetRandomValue(-1550,2450)};
+Vector2 getRandomPosCentro(){
+    Vector2 n = {GetRandomValue(worldSize*0.707*(-1),worldSize*0.707), GetRandomValue(worldSize*0.707*(-1),worldSize*0.707)};
     return n;
 }//centro
 
@@ -245,8 +262,6 @@ Color getRandomColor(){
     Color random1=(Color){ GetRandomValue(0, 255), GetRandomValue(0, 255), GetRandomValue(0, 255), 255 };
     return random1;
 }
-
-
 
 
 
@@ -314,6 +329,18 @@ void inicializarPosiciones(List *posiciones, Vector2 initialPositions[valorInici
 
 }
 
+
+void inicializarFakeGusanos(List *fakeGusanos[],List *posicionesFakeGusanos[],Vector2 randomPos[nGusanos][valorInicial]){
+    for(int i = 0; i<nGusanos;i++){
+         randomPos[i][0]=getRandomPosTodo();
+         fakeGusanos[i]=newList();
+         inicializarBloque(randomPos[i],fakeGusanos[i]);
+         posicionesFakeGusanos[i]=newList();
+         inicializarPosiciones(posicionesFakeGusanos[i],randomPos[i],randomPos[i][0]);
+    }
+}
+
+
 void updateListaP(List* posiciones,Vector2 mouse){
     Node* focus=posiciones->head;
     Vector2 *vec=focus->value;
@@ -356,49 +383,65 @@ void updateGusano(List *gusano,List *posiciones){
 }
 
 
-void updatePosFakeGusano(List* posiciones, Vector2 *pos){
+Vector2 updatePosFakeGusano(List* posiciones, Vector2 *pos){
     Vector2* posGusano = (Vector2*)posiciones->head->value;
-    *posGusano= Vector2Add(*posGusano,Vector2Normalize(Vector2Subtract(*pos,*posGusano)));
+    *posGusano= Vector2Add(*posGusano, Vector2Scale(Vector2Normalize(Vector2Subtract(*pos,*posGusano)),7));
     if(compareVector2(*pos, *posGusano)){
-        *pos=getRandomPos2();
+        *pos=getRandomPosTodo();
     }
+    return *posGusano;
 }
 
 int compareVector2(Vector2 a, Vector2 b){
-        if (a.x==b.x  && a.y==b.y){
+        if ((b.x>=a.x-7 && b.x<=a.x+7) && (b.y>=a.y-7 && b.y<b.y+7)){
             return 1;
         }
         return 0;
     }
 
 
-void food1(List *gusano,List *posiciones,Vector2 *randomPos, Color randomColor){
-    if(CheckCollisionCircles(getPosicion(gusano,0), getRadio(gusano,0),*randomPos,10)){
-        addElement(gusano, newBloque(getColor(gusano,0),1));
-        addElement(posiciones, newPos(getPosicion(gusano, 1).x,getPosicion(gusano, 1).y));
-        *randomPos=getRandomPos2();
-    }
-    else{
-        DrawCircleV(*randomPos,10,randomColor);
+void checkCollisionFood(List *gusano, List *posiciones, List* fakeGusanos[], List *fakeGusanosPos[],Vector2 randomPosTodo[],Vector2 randomPosCentro[],Color random[]){
+    for(int i =0; i<nFood;i++){//recorre toda la comida
+        for(int j=0; j<nGusanos;j++){//recorrer a todos los gusanos fake
+            //1° checa si hay colision entre uno de los fake y comida de todoel mapa
+            if(CheckCollisionCircles(getPosicion(fakeGusanos[j],0), getRadio(fakeGusanos[j],0),randomPosTodo[i],10)){
+                addElement(fakeGusanos[j], newBloque(getColor(fakeGusanos[j],0),1));
+                addElement(fakeGusanosPos[j], newPos(getPosicion(fakeGusanos[j], 1).x,getPosicion(fakeGusanos[j], 1).y));
+                randomPosTodo[i]=getRandomPosTodo();
+
+            }
+            //2° checa si hay colisión entre uno de los fake y comida del centro
+            if(CheckCollisionCircles(getPosicion(fakeGusanos[j],0), getRadio(fakeGusanos[j],0),randomPosCentro[i],10)){
+                addElement(fakeGusanos[j], newBloque(getColor(fakeGusanos[j],0),1));
+                addElement(fakeGusanosPos[j], newPos(getPosicion(fakeGusanos[j], 1).x,getPosicion(fakeGusanos[j], 1).y));
+                randomPosCentro[i]=getRandomPosCentro();
+            }
+        }
+        //checa si gusano original colision con circulos en todoel mapa
+        if(CheckCollisionCircles(getPosicion(gusano,0), getRadio(gusano,0),randomPosTodo[i],10)){
+            addElement(gusano, newBloque(getColor(gusano,0),1));
+            addElement(posiciones, newPos(getPosicion(gusano, 1).x,getPosicion(gusano, 1).y));
+            randomPosTodo[i]=getRandomPosTodo();
+        }
+        //checa si gusano original colisión con circulos en el centro
+        if(CheckCollisionCircles(getPosicion(gusano,0), getRadio(gusano,0),randomPosCentro[i],10)){
+            addElement(gusano, newBloque(getColor(gusano,0),1));
+            addElement(posiciones, newPos(getPosicion(gusano, 1).x,getPosicion(gusano, 1).y));
+            randomPosCentro[i]=getRandomPosCentro();
+        }
+        //dibuja la comida
+        DrawCircleV(randomPosTodo[i], 10, random[i]);
+        DrawCircleV(randomPosCentro[i], 10, random[i]);
     }
 }
 
-void food2(List *gusano,List *posiciones,Vector2 *randomPos, Color randomColor){
-    if(CheckCollisionCircles(getPosicion(gusano,0), getRadio(gusano,0),*randomPos,10)){
-        addElement(gusano, newBloque(getColor(gusano,0),1));
-        addElement(posiciones, newPos(getPosicion(gusano, 1).x,getPosicion(gusano, 1).y));
-        *randomPos=getRandomPos1();
-    }
-    else{
-        DrawCircleV(*randomPos,10,randomColor);
-    }
-}
+
 
 void foodPrep(Color foods[],Vector2 positionsCentro[], Vector2 positionsAll[],int n){
      for(int i=0;i<n;i++){
          foods[i]=getRandomColor();
-         positionsCentro[i]=getRandomPos2();
-         positionsAll[i]=getRandomPos1();
+         positionsCentro[i]=getRandomPosCentro();
+         positionsAll[i]=getRandomPosTodo();
      }
 }
 
@@ -418,11 +461,11 @@ void gameState(List *gusano)
     DrawText(TextFormat("Score: %d", getSize(gusano)-10),50,640,30,RED);
 
     //MAPA
-    DrawCircle(120, 780, 103, BLACK);
-    DrawCircle(120, 780, 100, RAYWHITE);
-    DrawLine(20, 780, 220, 780, BLACK);//linea vertical
-    DrawLine(120, 680, 120, 880, BLACK);//linea horizontal
-    DrawCircle(((getPosicion(gusano,0).x)/40)+97.5,((getPosicion(gusano,0).y)/40)+768.75,5,RED);
+    DrawCircle(120, 780, 110, BLACK);
+    DrawCircle(120, 780, 107, RAYWHITE);
+    DrawLine(15, 780, 225, 780, BLACK);//linea horizontal
+    DrawLine(120, 675, 120, 885, BLACK);//linea vertical
+    DrawCircle(((getPosicion(gusano,0).x)/(worldSize/100))+120,((getPosicion(gusano,0).y)/(worldSize/100))+780,5,RED);
 }
 
 
