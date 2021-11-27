@@ -221,6 +221,30 @@ main.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\experiments.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\experiments.dir\main.c.s
 .PHONY : main.c.s
 
+slitherio.obj: slitherio.c.obj
+.PHONY : slitherio.obj
+
+# target to build an object file
+slitherio.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\experiments.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\experiments.dir\slitherio.c.obj
+.PHONY : slitherio.c.obj
+
+slitherio.i: slitherio.c.i
+.PHONY : slitherio.i
+
+# target to preprocess a source file
+slitherio.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\experiments.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\experiments.dir\slitherio.c.i
+.PHONY : slitherio.c.i
+
+slitherio.s: slitherio.c.s
+.PHONY : slitherio.s
+
+# target to generate assembly for a file
+slitherio.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\experiments.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\experiments.dir\slitherio.c.s
+.PHONY : slitherio.c.s
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -240,6 +264,9 @@ help:
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s
+	@echo ... slitherio.obj
+	@echo ... slitherio.i
+	@echo ... slitherio.s
 .PHONY : help
 
 

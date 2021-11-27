@@ -411,6 +411,12 @@
 		<Unit filename="C:/Users/Ana Maria/CLionProjects/experiments/main.c">
 			<Option target="experiments"/>
 		</Unit>
+		<Unit filename="C:/Users/Ana Maria/CLionProjects/experiments/slitherio.c">
+			<Option target="experiments"/>
+		</Unit>
+		<Unit filename="C:/Users/Ana Maria/CLionProjects/experiments/slitherio.h">
+			<Option target="experiments"/>
+		</Unit>
 		<Unit filename="C:/Users/Ana Maria/CLionProjects/experiments/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
