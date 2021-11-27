@@ -197,6 +197,30 @@ glfw\fast:
 	$(MAKE) $(MAKESILENT) -f _deps\raylib-build\raylib\external\glfw\src\CMakeFiles\glfw.dir\build.make /nologo -$(MAKEFLAGS) _deps\raylib-build\raylib\external\glfw\src\CMakeFiles\glfw.dir\build
 .PHONY : glfw\fast
 
+lists.obj: lists.c.obj
+.PHONY : lists.obj
+
+# target to build an object file
+lists.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\experiments.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\experiments.dir\lists.c.obj
+.PHONY : lists.c.obj
+
+lists.i: lists.c.i
+.PHONY : lists.i
+
+# target to preprocess a source file
+lists.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\experiments.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\experiments.dir\lists.c.i
+.PHONY : lists.c.i
+
+lists.s: lists.c.s
+.PHONY : lists.s
+
+# target to generate assembly for a file
+lists.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\experiments.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\experiments.dir\lists.c.s
+.PHONY : lists.c.s
+
 main.obj: main.c.obj
 .PHONY : main.obj
 
@@ -261,6 +285,9 @@ help:
 	@echo ... experiments
 	@echo ... glfw
 	@echo ... raylib
+	@echo ... lists.obj
+	@echo ... lists.i
+	@echo ... lists.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s

@@ -2,6 +2,8 @@
 // Created by Ana Maria on 26/11/2021.
 //
 
+#include "lists.h"
+
 #ifndef EXPERIMENTS_SLITHERIO_H
 
 #define valorInicial 10
@@ -10,20 +12,19 @@
 #define worldSize 6000
 #define speed 7
 
-typedef struct node Node;
-typedef struct list List;
+
 typedef struct bloque Bloque;
 
 Bloque* getBloque(List* list,int index);
-Color getColor(List* gusano, int index);
-float getRadio(List* gusano,int index);
+Color getColor(List* gusano);
+float getRadio(List* gusano);
 Vector2 getPosicion(List* gusano,int index);
 void setPosicion(List* gusano, int index, Vector2 pos);
 Bloque *newBloque(Color color,int n);
 Vector2 *newPos(float x, float y);
 void inicializarBloque(Vector2 initialPositions[valorInicial], List *gusano);
 void inicializarPosiciones(List *posiciones,Vector2 initialPositions[valorInicial],Vector2 pInicial);
-void updateListaP(List* posiciones, Vector2 mouse);
+
 Vector2 mouseMovement(Vector2 mouse, List *posiciones);
 Vector2 Vector2Transformacion(Vector2 n);
 void updateGusano(List *gusano,List* posiciones);
@@ -42,11 +43,6 @@ Vector2 getRandomPosTodo();
 Vector2 getRandomPosCentro();
 Color getRandomColor();
 
-List *newList();
-void addElement(List *list,void* value);
-void removeLastElement(List *list);
-void* getElement(List* list,int index);
-int getSize(List *gusano);
 
 
 #define EXPERIMENTS_SLITHERIO_H

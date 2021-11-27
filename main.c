@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "slitherio.h"
+#include "lists.h"
 
 #define valorInicial 10
 #define nFood 400
@@ -49,7 +50,7 @@
         camera.target = (Vector2){getPosicion(gusano,1).x + 20.0f, getPosicion(gusano,1).y + 20.0f };
         camera.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f };
         camera.rotation = 0.0f;
-        camera.zoom = 1.0f;
+        camera.zoom = 0.2f;
 
         Vector2 fakeGusanoPos[nGusanos];
         for(int i=0;i<nGusanos;i++){
@@ -100,15 +101,15 @@
 
             //CUERPO GUSANO
             for(int i=0;i<getSize(gusano);i++){
-                DrawCircleV(getPosicion(gusano,i), (getRadio(gusano,i))+2, DARKGRAY);
-                DrawCircleV(getPosicion(gusano,i), getRadio(gusano,i), getColor(gusano,i));
+                DrawCircleV(getPosicion(gusano,i), (getRadio(gusano))+2, DARKGRAY);
+                DrawCircleV(getPosicion(gusano,i), getRadio(gusano), getColor(gusano));
             }
 
             //CUERPO GUSANO FAKE
             for(int j=0;j<nGusanos;j++){
                 for(int i=0;i<getSize(fGusano[j]);i++){
-                    DrawCircleV(getPosicion(fGusano[j],i), (getRadio(fGusano[j],i))+2, DARKGRAY);
-                    DrawCircleV(getPosicion(fGusano[j],i), getRadio(fGusano[j],i), getColor(fGusano[j],i));
+                    DrawCircleV(getPosicion(fGusano[j],i), (getRadio(fGusano[j]))+2, DARKGRAY);
+                    DrawCircleV(getPosicion(fGusano[j],i), getRadio(fGusano[j]), getColor(fGusano[j]));
                 }
             }
 

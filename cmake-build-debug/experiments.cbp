@@ -408,6 +408,12 @@
 		<Unit filename="C:/Users/Ana Maria/CLionProjects/experiments/cmake-build-debug/_deps/raylib-src/src/utils.h">
 			<Option target="raylib"/>
 		</Unit>
+		<Unit filename="C:/Users/Ana Maria/CLionProjects/experiments/lists.c">
+			<Option target="experiments"/>
+		</Unit>
+		<Unit filename="C:/Users/Ana Maria/CLionProjects/experiments/lists.h">
+			<Option target="experiments"/>
+		</Unit>
 		<Unit filename="C:/Users/Ana Maria/CLionProjects/experiments/main.c">
 			<Option target="experiments"/>
 		</Unit>

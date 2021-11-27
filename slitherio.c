@@ -7,19 +7,8 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "slitherio.h"
+#include "lists.h"
 
-
-
-
-struct node{
-    void* value;
-    struct node *next;
-};
-
-struct list{
-    Node* head;
-    int size;
-};
 
 struct bloque{
     Color color;
@@ -28,46 +17,6 @@ struct bloque{
     float radio;
 };
 
-
-
-
-List *newList(){//regresa el primer nodo de una lista
-    List *newHead= malloc(sizeof(List));
-    newHead->size=0;
-    newHead->head=NULL;
-    return newHead;
-}
-
-void* getElement(List* list, int index){
-    Node *focusNode=list->head;
-    for(int i=0;i<index;i++){
-        focusNode=focusNode->next;
-    }
-    return focusNode->value;
-}
-
-void addElement(List *list,void* value){
-    Node *new =malloc(sizeof(Node));
-    new->value=value;
-    new->next=list->head;
-    list->head=new;
-    list->size++;
-}
-
-void removeLastElement(List *list){
-    Node *focusNode = list->head;
-    while (focusNode->next->next!= NULL) {
-        focusNode = focusNode->next;
-    }
-    Node *elementDelete = focusNode->next;
-    focusNode->next = NULL;
-    free(elementDelete);
-    list->size--;
-}
-
-int getSize(List *list) {
-    return list->size;
-}
 
 Bloque *newBloque(Color color,int n){
     Bloque* new=malloc(sizeof(Bloque));
@@ -112,47 +61,39 @@ Color getRandomColor(){
 
 
 Bloque* getBloque(List* list,int index){
-    Node *focusNode = list->head;//index 0
+    Node *focusNode = getHead(list);//index 0
     for (int i = 0; i < index; i++) {
-        focusNode = focusNode->next;
+        focusNode = getNext(focusNode);
     }
-    Bloque *ptr = focusNode->value;
+    Bloque *ptr = getValue(focusNode);
     return ptr;
 }
 
-Color getColor(List* gusano, int index){
-    Node *focusNode = gusano->head;//index 0
-    for (int i = 0; i < index; i++) {
-        focusNode = focusNode->next;
-    }
-    Bloque *ptr = focusNode->value;
+Color getColor(List* gusano){
+    Bloque *ptr = getValue(getHead(gusano));
     return ptr->color;
 }
 
-float getRadio(List* gusano,int index){
-    Node *focusNode = gusano->head;//index 0
-    for (int i = 0; i < index; i++) {
-        focusNode = focusNode->next;
-    }
-    Bloque *ptr = focusNode->value;
+float getRadio(List* gusano){
+    Bloque *ptr = getValue(getHead(gusano));
     return ptr->radio;
 }
 
 Vector2 getPosicion(List* gusano,int index){
-    Node *focusNode = gusano->head;//index 0
+    Node *focusNode = getHead(gusano);//index 0
     for (int i = 0; i < index; i++) {
-        focusNode = focusNode->next;
+        focusNode = getNext(focusNode);
     }
-    Bloque *ptr = focusNode->value;
+    Bloque *ptr = getValue(focusNode);
     return ptr->posicion;
 }
 
 void setPosicion(List* gusano, int index,Vector2 pos){
-    Node *focusNode = gusano->head;//index 0
+    Node *focusNode = getHead(gusano);//index 0
     for (int i = 0; i < index; i++) {
-        focusNode = focusNode->next;
+        focusNode = getNext(focusNode);
     }
-    Bloque *ptr = focusNode->value;
+    Bloque *ptr = getValue(focusNode);
     ptr->posicion=pos;
 }
 
@@ -186,28 +127,7 @@ void inicializarFakeGusanos(List *fakeGusanos[],List *posicionesFakeGusanos[],Ve
 }
 
 
-void updateListaP(List* posiciones,Vector2 mouse){
-    Node* focus=posiciones->head;
-    Vector2 *vec=focus->value;
-    Vector2 tmp1=*vec;
-    Vector2 tmp2;
-    *vec=mouse;
-    while(focus->next!=NULL){
-        focus=focus->next;
-        vec=focus->value;
-        tmp2=*vec;
-        *vec=tmp1;
 
-        if(focus->next==NULL){
-            break;
-        }
-
-        focus=focus->next;
-        vec=focus->value;
-        tmp1=*vec;
-        *vec=tmp2;
-    }
-}
 
 Vector2 mouseMovement(Vector2 mouse,List *posiciones){
     Vector2 direction= Vector2Add(Vector2Transformacion(mouse),*((Vector2*)getElement(posiciones,0)));
@@ -222,14 +142,14 @@ Vector2 Vector2Transformacion(Vector2 n){
 }
 
 void updateGusano(List *gusano,List *posiciones){
-    for(int i =0; i<gusano->size;i++){
+    for(int i =0; i< getSize(gusano);i++){
         setPosicion(gusano,i,*(Vector2*)getElement(posiciones,i));
     }
 }
 
 
 Vector2 updatePosFakeGusano(List* posiciones, Vector2 *pos){
-    Vector2* posGusano = (Vector2*)posiciones->head->value;
+    Vector2* posGusano = (Vector2*)getValue(getHead(posiciones));
     *posGusano= Vector2Add(*posGusano, Vector2Scale(Vector2Normalize(Vector2Subtract(*pos,*posGusano)),speed));
     if(compareVector2(*pos, *posGusano)){
         *pos=getRandomPosTodo();
@@ -249,28 +169,28 @@ void checkCollisionFood(List *gusano, List *posiciones, List* fakeGusanos[], Lis
     for(int i =0; i<nFood;i++){//recorre toda la comida
         for(int j=0; j<nGusanos;j++){//recorrer a todos los gusanos fake
             //1° checa si hay colision entre uno de los fake y comida de todoel mapa
-            if(CheckCollisionCircles(getPosicion(fakeGusanos[j],0), getRadio(fakeGusanos[j],0),randomPosTodo[i],10)){
-                addElement(fakeGusanos[j], newBloque(getColor(fakeGusanos[j],0),1));
+            if(CheckCollisionCircles(getPosicion(fakeGusanos[j],0), getRadio(fakeGusanos[j]),randomPosTodo[i],10)){
+                addElement(fakeGusanos[j], newBloque(getColor(fakeGusanos[j]),1));
                 addElement(fakeGusanosPos[j], newPos(getPosicion(fakeGusanos[j], 1).x,getPosicion(fakeGusanos[j], 1).y));
                 randomPosTodo[i]=getRandomPosTodo();
 
             }
             //2° checa si hay colisión entre uno de los fake y comida del centro
-            if(CheckCollisionCircles(getPosicion(fakeGusanos[j],0), getRadio(fakeGusanos[j],0),randomPosCentro[i],10)){
-                addElement(fakeGusanos[j], newBloque(getColor(fakeGusanos[j],0),1));
+            if(CheckCollisionCircles(getPosicion(fakeGusanos[j],0), getRadio(fakeGusanos[j]),randomPosCentro[i],10)){
+                addElement(fakeGusanos[j], newBloque(getColor(fakeGusanos[j]),1));
                 addElement(fakeGusanosPos[j], newPos(getPosicion(fakeGusanos[j], 1).x,getPosicion(fakeGusanos[j], 1).y));
                 randomPosCentro[i]=getRandomPosCentro();
             }
         }
         //checa si gusano original colision con circulos en todoel mapa
-        if(CheckCollisionCircles(getPosicion(gusano,0), getRadio(gusano,0),randomPosTodo[i],10)){
-            addElement(gusano, newBloque(getColor(gusano,0),1));
+        if(CheckCollisionCircles(getPosicion(gusano,0), getRadio(gusano),randomPosTodo[i],10)){
+            addElement(gusano, newBloque(getColor(gusano),1));
             addElement(posiciones, newPos(getPosicion(gusano, 1).x,getPosicion(gusano, 1).y));
             randomPosTodo[i]=getRandomPosTodo();
         }
         //checa si gusano original colisión con circulos en el centro
-        if(CheckCollisionCircles(getPosicion(gusano,0), getRadio(gusano,0),randomPosCentro[i],10)){
-            addElement(gusano, newBloque(getColor(gusano,0),1));
+        if(CheckCollisionCircles(getPosicion(gusano,0), getRadio(gusano),randomPosCentro[i],10)){
+            addElement(gusano, newBloque(getColor(gusano),1));
             addElement(posiciones, newPos(getPosicion(gusano, 1).x,getPosicion(gusano, 1).y));
             randomPosCentro[i]=getRandomPosCentro();
         }
@@ -279,7 +199,6 @@ void checkCollisionFood(List *gusano, List *posiciones, List* fakeGusanos[], Lis
         DrawCircleV(randomPosCentro[i], 10, random[i]);
     }
 }
-
 
 
 void foodPrep(Color foods[],Vector2 positionsCentro[], Vector2 positionsAll[],int n){
