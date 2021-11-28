@@ -1,14 +1,11 @@
-#include <stdlib.h>
-#include <stdio.h>
 #include "raylib.h"
-#include "raymath.h"
 #include "slitherio.h"
 #include "lists.h"
 
     int main() {
         int play=0;
         int letter=0;
-        char player[MAX_INPUT_CHARS]="\0";
+        char player[maxInputChars]="\0";
         InitWindow(screenWidth, screenHeight, "Sliter.io -- Ana y Valeria");
 
         SetTargetFPS(30);
@@ -97,19 +94,14 @@
                 DrawCircle(0, 0, worldSize + 20, LIGHTGRAY);
 
                 //CUERPO GUSANO
-                for (int i = getSize(gusano)-1; i>0; i--) {
-                    DrawCircleV(getPosicion(gusano, i), (getRadio(gusano)) + 2, DARKGRAY);
-                    DrawCircleV(getPosicion(gusano, i), getRadio(gusano), getColor(gusano));
-                }
+                drawGusano(gusano);
 
-                //CUERPO GUSANO FAKE
+                //CUERPO GUSANOS FAKE
                 for (int j = 0; j < nGusanos; j++) {
-                    for (int i = getSize(fGusano[j])-1; i >0 ; i--) {
-                        DrawCircleV(getPosicion(fGusano[j], i), (getRadio(fGusano[j])) + 2, DARKGRAY);
-                        DrawCircleV(getPosicion(fGusano[j], i), getRadio(fGusano[j]), getColor(fGusano[j]));
-                    }
+                    drawGusano(fGusano[j]);
                 }
 
+                checkCollisionGusanos(gusano, posiciones, fGusano, fGusanoPos,&play);
 
                 //COMIDA
                 checkCollisionFood(gusano, posiciones, fGusano, fGusanoPos, randomCirclesTodo, randomCirclesCentro,foods);
@@ -118,7 +110,6 @@
                 gameplayer(gusano,player);
 
                 EndMode2D();
-
 
                 //MAPA, SCORE
                 gameState(gusano);

@@ -17,7 +17,6 @@ struct bloque{
     float radio;
 };
 
-
 Bloque *newBloque(Color color,int n){
     Bloque* new=malloc(sizeof(Bloque));
     new->color=color;
@@ -99,6 +98,7 @@ void setPosicion(List* gusano, int index,Vector2 pos){
 
 
 
+
 void inicializarBloque(Vector2 initialPositions[valorInicial], List *gusano){
     Color random1=(Color){ GetRandomValue(0, 255), GetRandomValue(0, 255), GetRandomValue(0, 255), 255 };
     for(int i = 0; i<valorInicial;i++){//inicializar bloque
@@ -114,7 +114,6 @@ void inicializarPosiciones(List *posiciones, Vector2 initialPositions[valorInici
     }
 
 }
-
 
 void inicializarFakeGusanos(List *fakeGusanos[],List *posicionesFakeGusanos[],Vector2 randomPos[nGusanos][valorInicial]){
     for(int i = 0; i<nGusanos;i++){
@@ -147,7 +146,6 @@ void updateGusano(List *gusano,List *posiciones){
     }
 }
 
-
 Vector2 updatePosFakeGusano(List* posiciones, Vector2 *pos){
     Vector2* posGusano = (Vector2*)getValue(getHead(posiciones));
     *posGusano= Vector2Add(*posGusano, Vector2Scale(Vector2Normalize(Vector2Subtract(*pos,*posGusano)),speed));
@@ -163,6 +161,51 @@ int compareVector2(Vector2 a, Vector2 b){
     }
     return 0;
 }
+
+
+void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], List *fakeGusanosPos[],int *play){
+    //CHECAR SI FAKE GUSANOS CHOCAN ENTRE SI
+    for(int i=0;i<nGusanos;i++){
+        for(int j =0; j<nGusanos;j++){
+            if(i!=j) {
+                for (int k = 0; k < getSize(fakeGusanos[j]) - 1; k++) {
+                    if (CheckCollisionCircles(getPosicion(fakeGusanos[i], 0), getRadio(fakeGusanos[i]),
+                                              getPosicion(fakeGusanos[j], k), getRadio(fakeGusanos[j]))) {
+                        while (getSize(fakeGusanos[i]) != valorInicial) {
+                            removeLastElement(fakeGusanos[i]);
+                        }
+                        setPosicion(fakeGusanos[i], 0, getRandomPosTodo());
+                    }
+                }
+            }
+        }
+    }
+    //CHECAR SI GUSANO CHOCA CON FAKE GUSANOS
+    for(int i=0;i<nGusanos;i++){
+        for(int j=0;j< getSize(fakeGusanos[i])-1;j++){
+            if(CheckCollisionCircles(getPosicion(gusano,0), getRadio(gusano), getPosicion(fakeGusanos[i],j), getRadio(fakeGusanos[i]))){
+                while(getSize(gusano)!=valorInicial){
+                    removeLastElement(gusano);
+                }
+                setPosicion(gusano,0,getRandomPosTodo());
+                *play=0;
+            }
+        }
+    }
+    //CHECAR SI FAKE GUSANOS CHOCAN CON GUSANO
+    for(int i=0;i<nGusanos;i++){
+        for(int j=0;j< getSize(gusano)-1;j++){
+            if(CheckCollisionCircles(getPosicion(fakeGusanos[i],0), getRadio(fakeGusanos[i]), getPosicion(gusano,j),getRadio(gusano))){
+                while(getSize(fakeGusanos[i])!=valorInicial){
+                    removeLastElement(fakeGusanos[i]);
+                }
+                setPosicion(fakeGusanos[i],0,getRandomPosTodo());
+            }
+        }
+    }
+}
+
+
 
 
 void checkCollisionFood(List *gusano, List *posiciones, List* fakeGusanos[], List *fakeGusanosPos[],Vector2 randomPosTodo[],Vector2 randomPosCentro[],Color random[]){
@@ -209,6 +252,8 @@ void inicializarFood(Color foods[],Vector2 positionsCentro[], Vector2 positionsA
 }
 
 
+
+
 void gameplayer(List *gusano,char player[]){
     Vector2 mostrar={getPosicion(gusano, 1).x,getPosicion(gusano, 1).y};
     DrawText(player ,mostrar.x,mostrar.y,20,BLACK);
@@ -220,7 +265,7 @@ void gameState(List *gusano)
     DrawText("Slither.io Prueba 626", 100, 100, 40, BLACK);
 
     //SCORE
-    DrawText(TextFormat("Score: %d", getSize(gusano)-10),50,640,30,RED);
+    DrawText(TextFormat("Score: %d", getSize(gusano)-valorInicial),50,640,30,RED);
 
     //MAPA
     DrawCircle(120, 780, 110, BLACK);
@@ -230,11 +275,12 @@ void gameState(List *gusano)
     DrawCircle(((getPosicion(gusano,0).x)/(worldSize/100))+120,((getPosicion(gusano,0).y)/(worldSize/100))+780,5,RED);
 }
 
+
 void initCamera(Camera2D *camera, List *gusano) {
     camera->target = (Vector2) {getPosicion(gusano, 0).x + 20.0f, getPosicion(gusano, 0).y + 20.0f};
     camera->offset = (Vector2) {screenWidth / 2.0f, screenHeight / 2.0f};
     camera->rotation = 0.0f;
-    camera->zoom = 1.0f;}
+    camera->zoom = 0.5f;}
 
 void starScreen(int sw, int* letterCount, char player[]){
     ClearBackground(BLACK);
@@ -254,7 +300,7 @@ void starScreen(int sw, int* letterCount, char player[]){
         SetMouseCursor(MOUSE_CURSOR_IBEAM);
         int key=GetCharPressed();
         while(key>0){
-            if((key>=32)&&(key<=125)&&(*letterCount<MAX_INPUT_CHARS)){
+            if((key>=32)&&(key<=125)&&(*letterCount<maxInputChars)){
                 player[*letterCount]=(char)key;
                 player[*letterCount+1]='\0';
                 (*letterCount)++;
@@ -280,10 +326,17 @@ void starScreen(int sw, int* letterCount, char player[]){
     DrawText(player, (int)textBox.x+5,(int)textBox.y+8,40,BLUE);
 
     if(mouseOnText){
-        if(*letterCount<MAX_INPUT_CHARS){
+        if(*letterCount<maxInputChars){
             if (((framesCounter/20)%2) == 0){
                 DrawText("_", (int)textBox.x + 8 + MeasureText(player, 40), (int)textBox.y + 12, 40, MAROON);
             }
         }
+    }
+}
+
+void drawGusano(List *gusano){
+    for (int i = getSize(gusano)-1; i>0; i--) {
+        DrawCircleV(getPosicion(gusano, i), (getRadio(gusano)) + 2, DARKGRAY);
+        DrawCircleV(getPosicion(gusano, i), getRadio(gusano), getColor(gusano));
     }
 }
