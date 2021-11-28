@@ -8,9 +8,12 @@
 
 #define valorInicial 10
 #define nFood 400
-#define nGusanos 20
+#define nGusanos 80
 #define worldSize 6000
 #define speed 7
+#define screenWidth 1800
+#define screenHeight 900
+#define MAX_INPUT_CHARS 900
 
 
 typedef struct bloque Bloque;
@@ -34,15 +37,16 @@ int compareVector2(Vector2 a, Vector2 b);
 
 
 void gameState(List *gusano);
-void gameplayer(List *gusano);
+void gameplayer(List *gusano, char player[]);
 
 void checkCollisionFood(List *gusano, List *posiciones, List* fakeGusanos[], List *fakeGusanosPos[],Vector2 randomPosTodo[],Vector2 randomPosCentro[],Color random[]);
-void foodPrep(Color foods[],Vector2 positionsCentro[], Vector2 positionsAll[],int n);
+void inicializarFood(Color foods[],Vector2 positionsCentro[], Vector2 positionsAll[],int n);
 
 Vector2 getRandomPosTodo();
 Vector2 getRandomPosCentro();
 Color getRandomColor();
-
+void initCamera(Camera2D *camera, List *gusano);
+void starScreen(int sw,int *letterCount,char player[]);
 
 
 #define EXPERIMENTS_SLITHERIO_H

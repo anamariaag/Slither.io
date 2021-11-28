@@ -200,8 +200,7 @@ void checkCollisionFood(List *gusano, List *posiciones, List* fakeGusanos[], Lis
     }
 }
 
-
-void foodPrep(Color foods[],Vector2 positionsCentro[], Vector2 positionsAll[],int n){
+void inicializarFood(Color foods[],Vector2 positionsCentro[], Vector2 positionsAll[],int n){
     for(int i=0;i<n;i++){
         foods[i]=getRandomColor();
         positionsCentro[i]=getRandomPosCentro();
@@ -210,11 +209,10 @@ void foodPrep(Color foods[],Vector2 positionsCentro[], Vector2 positionsAll[],in
 }
 
 
-void gameplayer(List *gusano){
+void gameplayer(List *gusano,char player[]){
     Vector2 mostrar={getPosicion(gusano, 1).x,getPosicion(gusano, 1).y};
-    DrawText("VALE",mostrar.x,mostrar.y,20,BLACK);
+    DrawText(player ,mostrar.x,mostrar.y,20,BLACK);
 }
-
 
 void gameState(List *gusano)
 {
@@ -230,4 +228,62 @@ void gameState(List *gusano)
     DrawLine(15, 780, 225, 780, BLACK);//linea horizontal
     DrawLine(120, 675, 120, 885, BLACK);//linea vertical
     DrawCircle(((getPosicion(gusano,0).x)/(worldSize/100))+120,((getPosicion(gusano,0).y)/(worldSize/100))+780,5,RED);
+}
+
+void initCamera(Camera2D *camera, List *gusano) {
+    camera->target = (Vector2) {getPosicion(gusano, 0).x + 20.0f, getPosicion(gusano, 0).y + 20.0f};
+    camera->offset = (Vector2) {screenWidth / 2.0f, screenHeight / 2.0f};
+    camera->rotation = 0.0f;
+    camera->zoom = 1.0f;}
+
+void starScreen(int sw, int* letterCount, char player[]){
+    ClearBackground(BLACK);
+    DrawText("Slither.io", 500, 190, 180,WHITE);
+    DrawText("By Ana & Val", 800, 390, 30,WHITE);
+    DrawText("Enter your name", 780, 450, 30,WHITE);
+    int framesCounter=0;
+    bool mouseOnText=false;
+    Rectangle textBox={sw/2.0f-100,500,225,50};
+    if(CheckCollisionPointRec(GetMousePosition(),textBox)){
+        mouseOnText=true;
+    }
+    else{
+        mouseOnText=false;
+    }
+    if(mouseOnText){
+        SetMouseCursor(MOUSE_CURSOR_IBEAM);
+        int key=GetCharPressed();
+        while(key>0){
+            if((key>=32)&&(key<=125)&&(*letterCount<MAX_INPUT_CHARS)){
+                player[*letterCount]=(char)key;
+                player[*letterCount+1]='\0';
+                (*letterCount)++;
+            }
+            key=GetCharPressed();
+        }
+        if(IsKeyPressed(KEY_BACKSPACE)){
+            (*letterCount)--;
+            if(*letterCount<0)
+                *letterCount=0;
+            player[*letterCount]='\0';
+        }
+    }
+    else
+        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+
+    if(mouseOnText)
+        framesCounter++;
+    else
+        framesCounter=0;
+
+    DrawRectangleRec(textBox,WHITE);
+    DrawText(player, (int)textBox.x+5,(int)textBox.y+8,40,BLUE);
+
+    if(mouseOnText){
+        if(*letterCount<MAX_INPUT_CHARS){
+            if (((framesCounter/20)%2) == 0){
+                DrawText("_", (int)textBox.x + 8 + MeasureText(player, 40), (int)textBox.y + 12, 40, MAROON);
+            }
+        }
+    }
 }
