@@ -46,6 +46,16 @@ Vector2 getRandomPosTodo(){
     return n;
 } //toda la pantalla
 
+Vector2 getRandomPosAfueras() {
+    Vector2 n;
+    do{
+        n.x = GetRandomValue((-1)*worldSize, worldSize);
+        n.y=GetRandomValue((-1)*worldSize, worldSize);
+    }
+    while ((n.x * n.x) + (n.y * n.y) > (worldSize * worldSize) && (n.x * n.x) + (n.y * n.y) > ((worldSize/2) * (worldSize/2)));
+    return n;
+}
+
 Vector2 getRandomPosCentro(){
     Vector2 n = {GetRandomValue(worldSize*0.707*(-1),worldSize*0.707), GetRandomValue(worldSize*0.707*(-1),worldSize*0.707)};
     return n;
@@ -183,12 +193,12 @@ Vector2 updatePosFakeGusano(List* posiciones, Vector2 *target){
     Vector2* posGusano = (Vector2*)getValue(getHead(posiciones));
     *posGusano= Vector2Add(*posGusano, Vector2Scale(Vector2Normalize(Vector2Subtract(*target,*posGusano)),speed));
     if(compareVector2(*target, *posGusano)){
-        *target=getRandomPosTodo();
+        *target=getRandomPosAfueras();
     }
     return *posGusano;
 }
 
-void fakeGusanoFollowFood(List* fakeGusanos, List *fakeGusanosPos,Vector2 randomPosTodo[],Vector2 randomPosCentro[],Color random[],Vector2 *target){
+void fakeGusanoFollowFood(List* fakeGusanos,Vector2 randomPosTodo[],Vector2 randomPosCentro[],Vector2 *target){
         for (int i = 0; i < nFood; i++) {//recorre toda la comida
                 //1° checa si hay colision entre uno de los fake y comida detodo el mapa
                 if (CheckCollisionCircles(getPosicion(fakeGusanos, 0), getRadio(fakeGusanos) + radioFindFood, randomPosTodo[i],
@@ -201,6 +211,24 @@ void fakeGusanoFollowFood(List* fakeGusanos, List *fakeGusanosPos,Vector2 random
                     *target=randomPosCentro[i];
                 }
             }
+}
+
+
+void fakeGusanoAvoidGusanos(List* fakeGusanos[],List* fakeGusano,Vector2 *target, int i, List *gusano){
+    for(int j =0; j<nGusanos;j++){
+        if(i!=j){
+            for (int k = 0; k < getSize(fakeGusanos[j]) - 1; k++) {
+                if (CheckCollisionCircles(getPosicion(fakeGusano, 0), getRadio(fakeGusano)+radioAvoidGusano, getPosicion(fakeGusanos[j], k), getRadio(fakeGusanos[j]))) {
+                    *target=getRandomPosAfueras();
+                }
+            }
+        }
+    }
+    for(int j=0;j< getSize(gusano)-1;j++){
+        if(CheckCollisionCircles(getPosicion(fakeGusano,0), getRadio(fakeGusano)+radioAvoidGusano, getPosicion(gusano,j),getRadio(gusano))){
+            *target=getRandomPosAfueras();
+        }
+    }
 }
 
 
@@ -238,7 +266,7 @@ void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], 
                             removeLastElement(fakeGusanos[i]);
                             removeLastElement(fakeGusanosPos[i]);
                         }
-                        setPosicion(fakeGusanosPos[i], 0, getRandomPosTodo());
+                        setPosicion(fakeGusanosPos[i], 0, getRandomPosAfueras());
                         setRadio(fakeGusanos[i],radioInicial);
                     }
                 }
@@ -268,7 +296,7 @@ void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], 
                     removeLastElement(fakeGusanosPos[i]);
                 }
                 setRadio(fakeGusanos[i],radioInicial);
-                setPosicion(fakeGusanosPos[i],0,getRandomPosTodo());
+                setPosicion(fakeGusanosPos[i],0,getRandomPosAfueras());
             }
         }
     }

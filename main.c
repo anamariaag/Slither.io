@@ -51,16 +51,17 @@
             updateListaP(posiciones, mouseMovement(GetMousePosition(),posiciones));
             updateGusano(gusano,posiciones);
 
-
             //UPDATE FAKE GUSANOS
             for(int i =0; i<nGusanos;i++){
                 updateListaP(fGusanoPos[i],updatePosFakeGusano(fGusanoPos[i],&fakeGusanoTarget[i]));
                 updateGusano(fGusano[i],fGusanoPos[i]);
-                fakeGusanoFollowFood(fGusano[i], fGusanoPos[i], randomCirclesTodo, randomCirclesCentro,foodsColores,&fakeGusanoTarget[i]);
+                fakeGusanoFollowFood(fGusano[i], randomCirclesTodo, randomCirclesCentro,&fakeGusanoTarget[i]);
+                fakeGusanoAvoidGusanos(fGusano,fGusano[i],&fakeGusanoTarget[i], i,gusano);
             }
 
-            checkBoundaries(posiciones,gusano,&play);
+            checkCollisionGusanos(gusano, posiciones, fGusano, fGusanoPos,&play);
 
+            checkBoundaries(posiciones,gusano,&play);
 
             // Camera target follows player
             camera.target = (Vector2){getPosicion(gusano,1).x , getPosicion(gusano,1).y};
@@ -96,7 +97,7 @@
 
                 //CIRCULO DE JUEGO
                 DrawCircle(0, 0, worldSize + 70,RED);
-                DrawCircle(0, 0, worldSize + 20, LIGHTGRAY);
+                DrawCircle(0, 0, worldSize+20, LIGHTGRAY);
 
                 //CUERPO GUSANO
                 drawGusano(gusano);
@@ -105,8 +106,6 @@
                 for (int j = 0; j < nGusanos; j++) {
                     drawGusano(fGusano[j]);
                 }
-
-                checkCollisionGusanos(gusano, posiciones, fGusano, fGusanoPos,&play);
 
                 //COMIDA
                 checkCollisionFood(gusano, posiciones, fGusano, fGusanoPos, randomCirclesTodo, randomCirclesCentro,foodsColores);

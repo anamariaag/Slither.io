@@ -7,9 +7,9 @@
 #ifndef EXPERIMENTS_SLITHERIO_H
 
 #define valorInicial 10
-#define nFood 100
-#define nGusanos 20
-#define worldSize 2000
+#define nFood 250
+#define nGusanos 50
+#define worldSize 3000
 #define speed 5
 #define screenWidth 1800
 #define screenHeight 900
@@ -17,6 +17,7 @@
 #define growth 1
 #define radioInicial 20
 #define radioFindFood 100
+#define radioAvoidGusano 30
 
 typedef struct bloque Bloque;
 
@@ -39,7 +40,8 @@ void checkBoundaries(List *posiciones, List *gusano, int *play);
 void updateGusano(List *gusano,List* posiciones);
 Vector2 updatePosFakeGusano(List* posiciones, Vector2 *pos);
 void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], List *fakeGusanosPos[],int *play);
-void fakeGusanoFollowFood(List* fakeGusanos, List *fakeGusanosPos,Vector2 randomPosTodo[],Vector2 randomPosCentro[],Color random[],Vector2 *target);
+void fakeGusanoFollowFood(List* fakeGusanos,Vector2 randomPosTodo[],Vector2 randomPosCentro[],Vector2 *target);
+void fakeGusanoAvoidGusanos(List* fakeGusanos[],List* fakeGusano, Vector2 *target,int i, List *gusano);
 
 void gameState(List *gusano);
 void gameplayer(List *gusano, char player[]);
@@ -48,6 +50,7 @@ void checkCollisionFood(List *gusano, List *posiciones, List* fakeGusanos[], Lis
 void inicializarFood(Color foods[],Vector2 positionsCentro[], Vector2 positionsAll[],int n);
 
 Vector2 getRandomPosTodo();
+Vector2 getRandomPosAfueras();
 Vector2 getRandomPosCentro();
 Color getRandomColor();
 void initCamera(Camera2D *camera, List *gusano);
