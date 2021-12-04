@@ -11,10 +11,10 @@
         SetTargetFPS(30);
         //--------------------------------------------------------------------------------------
 
-        Color foods[nFood];
+        Color foodsColores[nFood];
         Vector2 randomCirclesCentro[nFood];//centro
         Vector2 randomCirclesTodo[nFood];//toda la pantalla
-        inicializarFood(foods,randomCirclesCentro,randomCirclesTodo,nFood);
+        inicializarFood(foodsColores,randomCirclesCentro,randomCirclesTodo,nFood);
 
         Vector2 pInicial = { 100.0f, 100.0f };
         Vector2 initialPositions[valorInicial];
@@ -27,6 +27,7 @@
         Vector2 randomPosF[nGusanos][valorInicial];
         List* fGusano[nGusanos];
         List* fGusanoPos[nGusanos];
+        int randomSizes[nGusanos];
         inicializarFakeGusanos(fGusano,fGusanoPos,randomPosF);
 
         Camera2D camera;
@@ -55,7 +56,10 @@
             for(int i =0; i<nGusanos;i++){
                 updateListaP(fGusanoPos[i],updatePosFakeGusano(fGusanoPos[i],&fakeGusanoTarget[i]));
                 updateGusano(fGusano[i],fGusanoPos[i]);
+                fakeGusanoFollowFood(fGusano[i], fGusanoPos[i], randomCirclesTodo, randomCirclesCentro,foodsColores,&fakeGusanoTarget[i]);
             }
+
+            checkBoundaries(posiciones,gusano,&play);
 
 
             // Camera target follows player
@@ -80,17 +84,18 @@
             //----------------------------------------------------------------------------------
             BeginDrawing();
 
-
-            starScreen(screenWidth,&letter, player);
+            if(play==0)
+                starScreen(screenWidth,&letter, player);
 
             if(IsKeyPressed(KEY_SPACE)|| IsKeyPressed(KEY_ENTER))
                 play=1;
 
             if(play) {
-                ClearBackground(RAYWHITE);
+                ClearBackground(BLACK);
                 BeginMode2D(camera);
 
                 //CIRCULO DE JUEGO
+                DrawCircle(0, 0, worldSize + 70,RED);
                 DrawCircle(0, 0, worldSize + 20, LIGHTGRAY);
 
                 //CUERPO GUSANO
@@ -104,7 +109,7 @@
                 checkCollisionGusanos(gusano, posiciones, fGusano, fGusanoPos,&play);
 
                 //COMIDA
-                checkCollisionFood(gusano, posiciones, fGusano, fGusanoPos, randomCirclesTodo, randomCirclesCentro,foods);
+                checkCollisionFood(gusano, posiciones, fGusano, fGusanoPos, randomCirclesTodo, randomCirclesCentro,foodsColores);
 
                 //NOMBRE
                 gameplayer(gusano,player);
