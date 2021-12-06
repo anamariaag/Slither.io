@@ -5,6 +5,7 @@
     int main() {
         int play=0;
         int letter=0;
+        int countTrail=0;
         char player[maxInputChars]="\0";
         InitWindow(screenWidth, screenHeight, "Sliter.io -- Ana y Valeria");
 
@@ -59,12 +60,12 @@
                 fakeGusanoAvoidGusanos(fGusano,fGusano[i],&fakeGusanoTarget[i], i,gusano);
             }
 
-            checkCollisionGusanos(gusano, posiciones, fGusano, fGusanoPos,&play);
+            checkCollisionGusanos(gusano, posiciones, fGusano, fGusanoPos,&play,&countTrail,randomCirclesTodo);
 
             checkBoundaries(posiciones,gusano,&play);
 
             // Camera target follows player
-            camera.target = (Vector2){getPosicion(gusano,1).x , getPosicion(gusano,1).y};
+            camera.target = (Vector2){getPosicionGusano(gusano,1).x , getPosicionGusano(gusano,1).y};
 
             /* NOTA: vamos a cambiar el zoom conforme el gusano crezca
             // Camera zoom controls

@@ -110,13 +110,22 @@ void changeRadio(List *gusano){
     }
 }
 
-Vector2 getPosicion(List* gusano,int index){
+Vector2 getPosicionGusano(List* gusano,int index){
     Node *focusNode = getHead(gusano);//index 0
     for (int i = 0; i < index; i++) {
         focusNode = getNext(focusNode);
     }
     Bloque *ptr = getValue(focusNode);
     return ptr->posicion;
+}
+
+Vector2 getPosicion(List* posiciones,int index){
+    Node *focusNode = getHead(posiciones);//index 0
+    for (int i = 0; i < index; i++) {
+        focusNode = getNext(focusNode);
+    }
+    Vector2 *ptr = getValue(focusNode);
+    return *ptr;
 }
 
 void setPosicion(List* posiciones, int index,Vector2 pos){
@@ -180,6 +189,9 @@ Vector2 Vector2Transformacion(Vector2 n){
     n.x=n.x-900;
     n.y=n.y-400;
     Vector2 resultado = {n.x/ Vector2Length(n),n.y/ Vector2Length(n)};//calcular unitario
+    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+        return Vector2Scale(resultado,speed*2);
+    }
     return Vector2Scale(resultado,speed);
 }
 
@@ -201,35 +213,38 @@ Vector2 updatePosFakeGusano(List* posiciones, Vector2 *target){
 void fakeGusanoFollowFood(List* fakeGusanos,Vector2 randomPosTodo[],Vector2 randomPosCentro[],Vector2 *target){
         for (int i = 0; i < nFood; i++) {//recorre toda la comida
                 //1° checa si hay colision entre uno de los fake y comida detodo el mapa
-                if (CheckCollisionCircles(getPosicion(fakeGusanos, 0), getRadio(fakeGusanos) + radioFindFood, randomPosTodo[i],
+                if (CheckCollisionCircles(getPosicionGusano(fakeGusanos, 0), getRadio(fakeGusanos) + radioFindFood, randomPosTodo[i],
                                           10)) {
                     *target=randomPosTodo[i];
                 }
                 //2° checa si hay colisión entre uno de los fake y comida del centro
-                if (CheckCollisionCircles(getPosicion(fakeGusanos, 0), getRadio(fakeGusanos) + radioFindFood, randomPosCentro[i],
+                if (CheckCollisionCircles(getPosicionGusano(fakeGusanos, 0), getRadio(fakeGusanos) + radioFindFood, randomPosCentro[i],
                                           10)){
                     *target=randomPosCentro[i];
                 }
             }
 }
 
-
 void fakeGusanoAvoidGusanos(List* fakeGusanos[],List* fakeGusano,Vector2 *target, int i, List *gusano){
+    //checar colisiones con otros gusanos fake y evitarlas
     for(int j =0; j<nGusanos;j++){
         if(i!=j){
             for (int k = 0; k < getSize(fakeGusanos[j]) - 1; k++) {
-                if (CheckCollisionCircles(getPosicion(fakeGusano, 0), getRadio(fakeGusano)+radioAvoidGusano, getPosicion(fakeGusanos[j], k), getRadio(fakeGusanos[j]))) {
-                    *target=getRandomPosAfueras();
+                if (CheckCollisionCircles(getPosicionGusano(fakeGusano, 0), getRadio(fakeGusano)+radioAvoidGusano, getPosicionGusano(fakeGusanos[j], k), getRadio(fakeGusanos[j]))) {
+                    *target= getRandomPosAfueras();
                 }
             }
         }
     }
+    //checar colisiones con gusano original y evitarlo
     for(int j=0;j< getSize(gusano)-1;j++){
-        if(CheckCollisionCircles(getPosicion(fakeGusano,0), getRadio(fakeGusano)+radioAvoidGusano, getPosicion(gusano,j),getRadio(gusano))){
+        if(CheckCollisionCircles(getPosicionGusano(fakeGusano,0), getRadio(fakeGusano)+radioAvoidGusano, getPosicionGusano(gusano,j),getRadio(gusano))){
             *target=getRandomPosAfueras();
         }
     }
 }
+
+
 
 
 int compareVector2(Vector2 a, Vector2 b){
@@ -238,7 +253,6 @@ int compareVector2(Vector2 a, Vector2 b){
     }
     return 0;
 }
-
 
 void checkBoundaries(List *posiciones, List *gusano, int *play){
     Vector2 *pos= getElement(posiciones,0);
@@ -254,16 +268,20 @@ void checkBoundaries(List *posiciones, List *gusano, int *play){
 }
 
 
-void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], List *fakeGusanosPos[],int *play){
+
+void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], List *fakeGusanosPos[],int *play, int *count,Vector2 foodPosTodo[]){
     //CHECAR SI FAKE GUSANOS CHOCAN ENTRE SI
     for(int i=0;i<nGusanos;i++){
         for(int j =0; j<nGusanos;j++){
             if(i!=j) {
                 for (int k = 0; k < getSize(fakeGusanos[j]) - 1; k++) {
-                    if (CheckCollisionCircles(getPosicion(fakeGusanos[i], 0), getRadio(fakeGusanos[i]),
-                                              getPosicion(fakeGusanos[j], k), getRadio(fakeGusanos[j]))) {
+                    if (CheckCollisionCircles(getPosicionGusano(fakeGusanos[i], 0), getRadio(fakeGusanos[i]),
+                                              getPosicionGusano(fakeGusanos[j], k), getRadio(fakeGusanos[j]))) {
                         while (getSize(fakeGusanos[i]) != valorInicial) {
                             removeLastElement(fakeGusanos[i]);
+                        }
+                        //gusanoFoodTrail(foodPosTodo,fakeGusanosPos[i],*count);
+                        while (getSize(fakeGusanosPos[i]) != valorInicial) {
                             removeLastElement(fakeGusanosPos[i]);
                         }
                         setPosicion(fakeGusanosPos[i], 0, getRandomPosAfueras());
@@ -276,7 +294,7 @@ void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], 
     //CHECAR SI GUSANO CHOCA CON FAKE GUSANOS
     for(int i=0;i<nGusanos;i++){
         for(int j=0;j< getSize(fakeGusanos[i])-1;j++){
-            if(CheckCollisionCircles(getPosicion(gusano,0), getRadio(gusano), getPosicion(fakeGusanos[i],j), getRadio(fakeGusanos[i]))){
+            if(CheckCollisionCircles(getPosicionGusano(gusano,0), getRadio(gusano), getPosicionGusano(fakeGusanos[i],j), getRadio(fakeGusanos[i]))){
                 while(getSize(gusano)!=valorInicial){
                     removeLastElement(gusano);
                     removeLastElement(posiciones);
@@ -290,9 +308,12 @@ void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], 
     //CHECAR SI FAKE GUSANOS CHOCAN CON GUSANO
     for(int i=0;i<nGusanos;i++){
         for(int j=0;j< getSize(gusano)-1;j++){
-            if(CheckCollisionCircles(getPosicion(fakeGusanos[i],0), getRadio(fakeGusanos[i]), getPosicion(gusano,j),getRadio(gusano))){
-                while(getSize(fakeGusanos[i])!=valorInicial){
+            if(CheckCollisionCircles(getPosicionGusano(fakeGusanos[i],0), getRadio(fakeGusanos[i]), getPosicionGusano(gusano,j),getRadio(gusano))){
+                while (getSize(fakeGusanos[i]) != valorInicial) {
                     removeLastElement(fakeGusanos[i]);
+                }
+                //gusanoFoodTrail(foodPosTodo,fakeGusanosPos[i],*count);
+                while (getSize(fakeGusanosPos[i]) != valorInicial) {
                     removeLastElement(fakeGusanosPos[i]);
                 }
                 setRadio(fakeGusanos[i],radioInicial);
@@ -304,37 +325,47 @@ void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], 
 
 
 
+void gusanoFoodTrail(Vector2 foodPosTodo[], List* gusano, int count){
+    for(int i=0; i< getSize(gusano);i++){
+        if(count==nFood-1){
+            count=0;
+        }
+        foodPosTodo[i+count] = getPosicion(gusano,i);
+        count++;
+    }
+
+}
 
 void checkCollisionFood(List *gusano, List *posiciones, List* fakeGusanos[], List *fakeGusanosPos[],Vector2 randomPosTodo[],Vector2 randomPosCentro[],Color random[]){
     for(int i =0; i<nFood;i++){//recorre toda la comida
         for(int j=0; j<nGusanos;j++){//recorrer a todos los gusanos fake
             //1° checa si hay colision entre uno de los fake y comida de todoel mapa
-            if(CheckCollisionCircles(getPosicion(fakeGusanos[j],0), getRadio(fakeGusanos[j]),randomPosTodo[i],10)){
+            if(CheckCollisionCircles(getPosicionGusano(fakeGusanos[j],0), getRadio(fakeGusanos[j]),randomPosTodo[i],10)){
                 addElement(fakeGusanos[j], newBloque(getColor(fakeGusanos[j]),1, getRadio(fakeGusanos[j])));
                 changeRadio(fakeGusanos[j]);
-                addElement(fakeGusanosPos[j], newPos(getPosicion(fakeGusanos[j], 1).x,getPosicion(fakeGusanos[j], 1).y));
+                addElement(fakeGusanosPos[j], newPos(getPosicionGusano(fakeGusanos[j], 1).x,getPosicionGusano(fakeGusanos[j], 1).y));
                 randomPosTodo[i]=getRandomPosTodo();
 
             }
             //2° checa si hay colisión entre uno de los fake y comida del centro
-            if(CheckCollisionCircles(getPosicion(fakeGusanos[j],0), getRadio(fakeGusanos[j]),randomPosCentro[i],10)){
+            if(CheckCollisionCircles(getPosicionGusano(fakeGusanos[j],0), getRadio(fakeGusanos[j]),randomPosCentro[i],10)){
                 addElement(fakeGusanos[j], newBloque(getColor(fakeGusanos[j]),1, getRadio(fakeGusanos[j])));
-                addElement(fakeGusanosPos[j], newPos(getPosicion(fakeGusanos[j], 1).x,getPosicion(fakeGusanos[j], 1).y));
+                addElement(fakeGusanosPos[j], newPos(getPosicionGusano(fakeGusanos[j], 1).x,getPosicionGusano(fakeGusanos[j], 1).y));
                 changeRadio(fakeGusanos[j]);
                 randomPosCentro[i]=getRandomPosCentro();
             }
         }
         //checa si gusano original colision con circulos en todoel mapa
-        if(CheckCollisionCircles(getPosicion(gusano,0), getRadio(gusano),randomPosTodo[i],10)){
+        if(CheckCollisionCircles(getPosicionGusano(gusano,0), getRadio(gusano),randomPosTodo[i],10)){
             addElement(gusano, newBloque(getColor(gusano),1, getRadio(gusano)));
-            addElement(posiciones, newPos(getPosicion(gusano, 1).x,getPosicion(gusano, 1).y));
+            addElement(posiciones, newPos(getPosicionGusano(gusano, 1).x,getPosicionGusano(gusano, 1).y));
             changeRadio(gusano);
             randomPosTodo[i]=getRandomPosTodo();
         }
         //checa si gusano original colisión con circulos en el centro
-        if(CheckCollisionCircles(getPosicion(gusano,0), getRadio(gusano),randomPosCentro[i],10)){
+        if(CheckCollisionCircles(getPosicionGusano(gusano,0), getRadio(gusano),randomPosCentro[i],10)){
             addElement(gusano, newBloque(getColor(gusano),1, getRadio(gusano)));
-            addElement(posiciones, newPos(getPosicion(gusano, 1).x,getPosicion(gusano, 1).y));
+            addElement(posiciones, newPos(getPosicionGusano(gusano, 1).x,getPosicionGusano(gusano, 1).y));
             changeRadio(gusano);
             randomPosCentro[i]=getRandomPosCentro();
         }
@@ -356,14 +387,13 @@ void inicializarFood(Color foods[],Vector2 positionsCentro[], Vector2 positionsA
 
 
 void gameplayer(List *gusano,char player[]){
-    Vector2 mostrar={getPosicion(gusano, 1).x,getPosicion(gusano, 1).y};
+    Vector2 mostrar={getPosicionGusano(gusano, 1).x,getPosicionGusano(gusano, 1).y};
     DrawText(player ,mostrar.x,mostrar.y,20,BLACK);
 }
 
 void gameState(List *gusano)
 {
     //TITULO
-    DrawText("Slither.io Prueba 626", 100, 100, 40, BLACK);
 
     //SCORE
     DrawText(TextFormat("Score: %d", getSize(gusano)-valorInicial),50,640,30,RED);
@@ -373,12 +403,12 @@ void gameState(List *gusano)
     DrawCircle(120, 780, 107, LIGHTGRAY);
     DrawLine(15, 780, 225, 780, BLACK);//linea horizontal
     DrawLine(120, 675, 120, 885, BLACK);//linea vertical
-    DrawCircle(((getPosicion(gusano,0).x)/(worldSize/100))+120,((getPosicion(gusano,0).y)/(worldSize/100))+780,5,RED);
+    DrawCircle(((getPosicionGusano(gusano,0).x)/(worldSize/100))+120,((getPosicionGusano(gusano,0).y)/(worldSize/100))+780,5,RED);
 }
 
 
 void initCamera(Camera2D *camera, List *gusano) {
-    camera->target = (Vector2) {getPosicion(gusano, 0).x + 20.0f, getPosicion(gusano, 0).y + 20.0f};
+    camera->target = (Vector2) {getPosicionGusano(gusano, 0).x + 20.0f, getPosicionGusano(gusano, 0).y + 20.0f};
     camera->offset = (Vector2) {screenWidth / 2.0f, screenHeight / 2.0f};
     camera->rotation = 0.0f;
     camera->zoom = 0.5f;}
@@ -437,7 +467,7 @@ void starScreen(int sw, int* letterCount, char player[]){
 
 void drawGusano(List *gusano){
     for (int i = getSize(gusano)-1; i>0; i--) {
-        DrawCircleV(getPosicion(gusano, i), (getRadio(gusano)) + 2, DARKGRAY);
-        DrawCircleV(getPosicion(gusano, i), getRadio(gusano), getColor(gusano));
+        DrawCircleV(getPosicionGusano(gusano, i), (getRadio(gusano)) + 2, DARKGRAY);
+        DrawCircleV(getPosicionGusano(gusano, i), getRadio(gusano), getColor(gusano));
     }
 }

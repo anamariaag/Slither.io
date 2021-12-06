@@ -7,9 +7,9 @@
 #ifndef EXPERIMENTS_SLITHERIO_H
 
 #define valorInicial 10
-#define nFood 250
-#define nGusanos 50
-#define worldSize 3000
+#define nFood 80
+#define nGusanos 10
+#define worldSize 1000
 #define speed 5
 #define screenWidth 1800
 #define screenHeight 900
@@ -26,6 +26,7 @@ Color getColor(List* gusano);
 float getRadio(List* gusano);
 void setRadio(List* gusano, float newValue);
 void changeRadio(List *gusano);
+Vector2 getPosicionGusano(List* gusano,int index);
 Vector2 getPosicion(List* gusano,int index);
 void setPosicion(List* gusano, int index, Vector2 pos);
 void setPosicionGusano(List* posiciones, int index,Vector2 pos);
@@ -39,13 +40,14 @@ Vector2 mouseMovement(Vector2 mouse, List *posiciones);
 void checkBoundaries(List *posiciones, List *gusano, int *play);
 void updateGusano(List *gusano,List* posiciones);
 Vector2 updatePosFakeGusano(List* posiciones, Vector2 *pos);
-void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], List *fakeGusanosPos[],int *play);
+void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], List *fakeGusanosPos[],int *play,int *count,Vector2 foodPosTodo[]);
 void fakeGusanoFollowFood(List* fakeGusanos,Vector2 randomPosTodo[],Vector2 randomPosCentro[],Vector2 *target);
 void fakeGusanoAvoidGusanos(List* fakeGusanos[],List* fakeGusano, Vector2 *target,int i, List *gusano);
 
 void gameState(List *gusano);
 void gameplayer(List *gusano, char player[]);
 
+void gusanoFoodTrail(Vector2 foodPosTodo[], List* gusano, int count);
 void checkCollisionFood(List *gusano, List *posiciones, List* fakeGusanos[], List *fakeGusanosPos[],Vector2 randomPosTodo[],Vector2 randomPosCentro[],Color random[]);
 void inicializarFood(Color foods[],Vector2 positionsCentro[], Vector2 positionsAll[],int n);
 
