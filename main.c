@@ -6,6 +6,7 @@
         int play=0;
         int letter=0;
         int countTrail=0;
+        int flags[nGusanos]={0};
         char player[maxInputChars]="\0";
         InitWindow(screenWidth, screenHeight, "Sliter.io -- Ana y Valeria");
 
@@ -57,7 +58,7 @@
                 updateListaP(fGusanoPos[i],updatePosFakeGusano(fGusanoPos[i],&fakeGusanoTarget[i]));
                 updateGusano(fGusano[i],fGusanoPos[i]);
                 fakeGusanoFollowFood(fGusano[i], randomCirclesTodo, randomCirclesCentro,&fakeGusanoTarget[i]);
-                fakeGusanoAvoidGusanos(fGusano,fGusano[i],&fakeGusanoTarget[i], i,gusano);
+                fakeGusanoAvoidGusanos(fGusano,fGusano[i],&fakeGusanoTarget[i], i,gusano,&flags[i]);
             }
 
             checkCollisionGusanos(gusano, posiciones, fGusano, fGusanoPos,&play,&countTrail,randomCirclesTodo);

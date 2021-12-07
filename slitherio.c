@@ -225,21 +225,31 @@ void fakeGusanoFollowFood(List* fakeGusanos,Vector2 randomPosTodo[],Vector2 rand
             }
 }
 
-void fakeGusanoAvoidGusanos(List* fakeGusanos[],List* fakeGusano,Vector2 *target, int i, List *gusano){
+void fakeGusanoAvoidGusanos(List* fakeGusanos[],List* fakeGusano,Vector2 *target, int i, List *gusano, int* flag){
     //checar colisiones con otros gusanos fake y evitarlas
     for(int j =0; j<nGusanos;j++){
         if(i!=j){
             for (int k = 0; k < getSize(fakeGusanos[j]) - 1; k++) {
-                if (CheckCollisionCircles(getPosicionGusano(fakeGusano, 0), getRadio(fakeGusano)+radioAvoidGusano, getPosicionGusano(fakeGusanos[j], k), getRadio(fakeGusanos[j]))) {
-                    *target= getRandomPosAfueras();
+                if (CheckCollisionCircles(getPosicionGusano(fakeGusano, 0), getRadio(fakeGusano)+radioAvoidGusano, getPosicionGusano(fakeGusanos[j], k), getRadio(fakeGusanos[j])) && *flag ==0) {
+                    target->x=(-1)*target->x;
+                    target->y=(-1)*target->y;
+                    *flag=1;
+                }
+                else{
+                    *flag=0;
                 }
             }
         }
     }
     //checar colisiones con gusano original y evitarlo
     for(int j=0;j< getSize(gusano)-1;j++){
-        if(CheckCollisionCircles(getPosicionGusano(fakeGusano,0), getRadio(fakeGusano)+radioAvoidGusano, getPosicionGusano(gusano,j),getRadio(gusano))){
-            *target=getRandomPosAfueras();
+        if(CheckCollisionCircles(getPosicionGusano(fakeGusano,0), getRadio(fakeGusano)+radioAvoidGusano, getPosicionGusano(gusano,j),getRadio(gusano)) && *flag==0){
+            target->x=(-1)*target->x;
+            target->y=(-1)*target->y;
+            *flag=1;
+        }
+        else{
+            *flag=0;
         }
     }
 }
@@ -277,11 +287,9 @@ void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], 
                 for (int k = 0; k < getSize(fakeGusanos[j]) - 1; k++) {
                     if (CheckCollisionCircles(getPosicionGusano(fakeGusanos[i], 0), getRadio(fakeGusanos[i]),
                                               getPosicionGusano(fakeGusanos[j], k), getRadio(fakeGusanos[j]))) {
+                        gusanoFoodTrail(foodPosTodo,fakeGusanosPos[i],getPosicion(fakeGusanosPos[i],0),*count);
                         while (getSize(fakeGusanos[i]) != valorInicial) {
                             removeLastElement(fakeGusanos[i]);
-                        }
-                        //gusanoFoodTrail(foodPosTodo,fakeGusanosPos[i],*count);
-                        while (getSize(fakeGusanosPos[i]) != valorInicial) {
                             removeLastElement(fakeGusanosPos[i]);
                         }
                         setPosicion(fakeGusanosPos[i], 0, getRandomPosAfueras());
@@ -309,11 +317,9 @@ void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], 
     for(int i=0;i<nGusanos;i++){
         for(int j=0;j< getSize(gusano)-1;j++){
             if(CheckCollisionCircles(getPosicionGusano(fakeGusanos[i],0), getRadio(fakeGusanos[i]), getPosicionGusano(gusano,j),getRadio(gusano))){
+                gusanoFoodTrail(foodPosTodo,fakeGusanosPos[i], getPosicion(fakeGusanosPos[i],0),*count);
                 while (getSize(fakeGusanos[i]) != valorInicial) {
                     removeLastElement(fakeGusanos[i]);
-                }
-                //gusanoFoodTrail(foodPosTodo,fakeGusanosPos[i],*count);
-                while (getSize(fakeGusanosPos[i]) != valorInicial) {
                     removeLastElement(fakeGusanosPos[i]);
                 }
                 setRadio(fakeGusanos[i],radioInicial);
@@ -325,13 +331,16 @@ void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], 
 
 
 
-void gusanoFoodTrail(Vector2 foodPosTodo[], List* gusano, int count){
+void gusanoFoodTrail(Vector2 foodPosTodo[], List *gusano, Vector2 posInicial, int count){
+    Vector2 v={1,1};
     for(int i=0; i< getSize(gusano);i++){
         if(count==nFood-1){
             count=0;
         }
-        foodPosTodo[i+count] = getPosicion(gusano,i);
-        count++;
+        if(i%5==0){
+            foodPosTodo[count] = getPosicion(gusano,i);
+            count++;
+        }
     }
 
 }
