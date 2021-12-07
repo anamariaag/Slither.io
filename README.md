@@ -31,15 +31,23 @@ Bloque | Elementos que componen el gusano, cada uno tiene color, posición, radi
 
 Funciones | Descripción 
 --- | --- 
-Vector2 getPosicionGusano(List* gusano,int index); | Recibe lista dinámica del cuerpo del gusano y índice para seleccionar el elemento que regresará la posición. 
+void starScreen(int sw,int* letterCount,char player[]); | Función que permite visualizar la pantalla principal, se recibe el nombre del jugador.
+void initCamera(Camera2D* camera, List* gusano); | Función que inicializar la cámara 2D.
 void inicializarBloque(Vector2 initialPositions[valorInicial], List* gusano); | Recibe un arreglo de posiciones y lista dinámica del cuerpo de gusano original, inicializa bloque del cuerpo del gusano con las posiciones del arreglo, color random y radioInicial. 
 void inicializarPosiciones(List* posiciones,Vector2 initialPositions[valorInicial],Vector2 pInicial);| Inicializa posiciones para gusano original.
 void inicializarFakeGusanos(List* fakeGusanos[],List* posicionesFakeGusanos[],Vector2 randomPos[nGusanos][valorInicial]);| Inicializa cuerpo de gusanos I.A. y sus posiciones con listas dinámicas.
-Vector2 mouseMovement(Vector2 mouse, List* posiciones);  |Función que permite que el gusano siga la dirección del mouse.
-void checkBoundaries(List* posiciones, List* gusano, int* play);  | Si el gusano tiene colisión con los limites del wordlSize el gusano muere, se reincia partida.
+void inicializarFood(Color foods[],Vector2 positionsCentro[], Vector2 positionsAll[],int n); | Función que inicializa 2 arreglos de comida de tamaño nFood cada uno.
+Vector2 getRandomPosTodo(); | Función que permite posicionar gusanos o comida en todo el worldSize.
+void gameState(List* gusano); | Función que muestra el score de la longitud del gusano y el mapa de ubicación.
+void gameplayer(List* gusano, char player[]); | Función que muestra el nombre del jugador a un costado del gusano.
+void drawGusano(List* gusano); | Función que se encarga de dibujar gusano.
 void updateGusano(List* gusano,List* posiciones);  | Función que actualiza las posiciónes que el mouse debe de seguir.
 Vector2 updatePosFakeGusano(List* posiciones, Vector2* target);  | Función que permite los movimientos de gusanos de IA.
+Vector2 getPosicionGusano(List* gusano,int index); | Recibe lista dinámica del cuerpo del gusano y índice para seleccionar el elemento que regresará la posición. 
+Vector2 mouseMovement(Vector2 mouse, List* posiciones);  |Función que permite que el gusano siga la dirección del mouse.
+void checkBoundaries(List* posiciones, List* gusano, int* play);  | Si el gusano tiene colisión con los limites del wordlSize el gusano muere, se reincia partida.
 void checkCollisionGusanos(List* gusano, List* posiciones, List* fakeGusanos[], List* fakeGusanosPos[],int* play,int* count,Vector2 foodPosTodo[]);  | Función que revisa si hay algún tipo de colisión, ya sea entre gusanos de IA, o del gusano con uno de IA.
+void checkCollisionFood(List* gusano, List* posiciones, List* fakeGusanos[], List* fakeGusanosPos[],Vector2 randomPosTodo[],Vector2 randomPosCentro[],Color random[]); | Fucnión que detecta si hay colisiones entre cualquier tipo de gusano y comida en el mundo.
 void fakeGusanoFollowFood(List* fakeGusanos,Vector2 randomPosTodo[],Vector2 randomPosCentro[],Vector2* target);  | Función que se encarga que un gusano de IA busque comida cercana.
 void fakeGusanoAvoidGusanos(List* fakeGusanos[],List* fakeGusano, Vector2* target,int i, List* gusano,int* flag);  | Función que se encarga de que un gusano de IA evite colisionar con otro gusano a partir de un cambio de posición.
 
