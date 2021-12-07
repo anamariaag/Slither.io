@@ -40,8 +40,8 @@ void checkBoundaries(List* posiciones, List* gusano, int* play);  | Si el gusano
 void updateGusano(List* gusano,List* posiciones);  | Función que actualiza las posiciónes que el mouse debe de seguir.
 Vector2 updatePosFakeGusano(List* posiciones, Vector2* target);  | Función que permite los movimientos de gusanos de IA.
 void checkCollisionGusanos(List* gusano, List* posiciones, List* fakeGusanos[], List* fakeGusanosPos[],int* play,int* count,Vector2 foodPosTodo[]);  | Función que revisa si hay algún tipo de colisión, ya sea entre gusanos de IA, o del gusano con uno de IA.
-void fakeGusanoFollowFood(List* fakeGusanos,Vector2 randomPosTodo[],Vector2 randomPosCentro[],Vector2* target);  | Función que se encarga que un gusano de IA busque comida cercana
-void fakeGusanoAvoidGusanos(List* fakeGusanos[],List* fakeGusano, Vector2* target,int i, List* gusano,int* flag);  | Función que se encarga de que un gusano de IA evite colisionar con otro gusano a partir de un cambio de posición
+void fakeGusanoFollowFood(List* fakeGusanos,Vector2 randomPosTodo[],Vector2 randomPosCentro[],Vector2* target);  | Función que se encarga que un gusano de IA busque comida cercana.
+void fakeGusanoAvoidGusanos(List* fakeGusanos[],List* fakeGusano, Vector2* target,int i, List* gusano,int* flag);  | Función que se encarga de que un gusano de IA evite colisionar con otro gusano a partir de un cambio de posición.
 
 
 
