@@ -318,7 +318,7 @@ void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], 
                 for (int k = 0; k < getSize(fakeGusanos[j]) - 1; k++) {
                     if (CheckCollisionCircles(getPosicionGusano(fakeGusanos[i], 0), getRadio(fakeGusanos[i]),
                                               getPosicionGusano(fakeGusanos[j], k), getRadio(fakeGusanos[j]))) {
-                        gusanoFoodTrail(foodPosTodo,fakeGusanosPos[i],*count);
+                        //gusanoFoodTrail(foodPosTodo,fakeGusanosPos[i],*count);
                         while (getSize(fakeGusanos[i]) != valorInicial) {
                             removeLastElement(fakeGusanos[i]);
                             removeLastElement(fakeGusanosPos[i]);
@@ -348,7 +348,7 @@ void checkCollisionGusanos(List *gusano, List *posiciones, List* fakeGusanos[], 
     for(int i=0;i<nGusanos;i++){
         for(int j=0;j< getSize(gusano)-1;j++){
             if(CheckCollisionCircles(getPosicionGusano(fakeGusanos[i],0), getRadio(fakeGusanos[i]), getPosicionGusano(gusano,j),getRadio(gusano))){
-                gusanoFoodTrail(foodPosTodo,fakeGusanosPos[i],*count);
+                //gusanoFoodTrail(foodPosTodo,fakeGusanosPos[i],*count);
                 while (getSize(fakeGusanos[i]) != valorInicial) {
                     removeLastElement(fakeGusanos[i]);
                     removeLastElement(fakeGusanosPos[i]);
