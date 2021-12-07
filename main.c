@@ -3,15 +3,12 @@
 #include "lists.h"
 
     int main() {
+        //INICIALIZACIÓN DE VARIABLES, LISTAS Y ARREGLOS
         int play=0;
         int letter=0;
         int countTrail=0;
         int flags[nGusanos]={0};
         char player[maxInputChars]="\0";
-        InitWindow(screenWidth, screenHeight, "Sliter.io -- Ana y Valeria");
-
-        SetTargetFPS(30);
-        //--------------------------------------------------------------------------------------
 
         Color foodsColores[nFood];
         Vector2 randomCirclesCentro[nFood];//centro
@@ -29,35 +26,38 @@
         Vector2 randomPosF[nGusanos][valorInicial];
         List* fGusano[nGusanos];
         List* fGusanoPos[nGusanos];
-        int randomSizes[nGusanos];
         inicializarFakeGusanos(fGusano,fGusanoPos,randomPosF);
 
         Camera2D camera;
         initCamera(&camera,gusano);
 
 
-        //TARGET HACIA DONDE SE MUEVEN FAKE GUSANOS
+        //TARGET - HACIA DONDE SE MUEVEN FAKE GUSANOS
         Vector2 fakeGusanoTarget[nGusanos];
         for(int i=0;i<nGusanos;i++){
             fakeGusanoTarget[i]=getRandomPosTodo();
         }
 
+        //TITULO DE VENTANA
+        InitWindow(screenWidth, screenHeight, "Sliter.io -- Ana y Valeria");
+
+        SetTargetFPS(30);
+
         // Main game loop
         while (!WindowShouldClose())
         {
-            // Update
-            //----------------------------------------------------------------------------------
-            // TODO: Update your variables here
-
             //UPDATE GUSANO
             updateListaP(posiciones, mouseMovement(GetMousePosition(),posiciones));
             updateGusano(gusano,posiciones);
 
-            //UPDATE FAKE GUSANOS
+            //BEHAVIOR FAKE GUSANOS
             for(int i =0; i<nGusanos;i++){
+                //MOVIMIENTO
                 updateListaP(fGusanoPos[i],updatePosFakeGusano(fGusanoPos[i],&fakeGusanoTarget[i]));
                 updateGusano(fGusano[i],fGusanoPos[i]);
+                //COMIDA
                 fakeGusanoFollowFood(fGusano[i], randomCirclesTodo, randomCirclesCentro,&fakeGusanoTarget[i]);
+                //EVITAR OTROS GUSANOS
                 fakeGusanoAvoidGusanos(fGusano,fGusano[i],&fakeGusanoTarget[i], i,gusano,&flags[i]);
             }
 
@@ -68,27 +68,11 @@
             // Camera target follows player
             camera.target = (Vector2){getPosicionGusano(gusano,1).x , getPosicionGusano(gusano,1).y};
 
-            /* NOTA: vamos a cambiar el zoom conforme el gusano crezca
-            // Camera zoom controls
-            camera.zoom += ((float)GetMouseWheelMove()*0.05f);
-
-            if (camera.zoom > 3.0f) camera.zoom = 3.0f;
-            else if (camera.zoom < 0.1f) camera.zoom = 0.1f;
-
-            // Camera reset (zoom and rotation)
-            if (IsKeyPressed(KEY_R))
-            {
-                camera.zoom = 1.0f;
-                camera.rotation = 0.0f;
-            }*/
-
-
-            // Draw
-            //----------------------------------------------------------------------------------
             BeginDrawing();
 
-            if(play==0)
+            if(play==0)//PANTALLA INICIAL
                 starScreen(screenWidth,&letter, player);
+
 
             if(IsKeyPressed(KEY_SPACE)|| IsKeyPressed(KEY_ENTER))
                 play=1;
@@ -97,7 +81,7 @@
                 ClearBackground(BLACK);
                 BeginMode2D(camera);
 
-                //CIRCULO DE JUEGO
+                //CIRCULO DE JUEGO/MUNDO
                 DrawCircle(0, 0, worldSize + 70,RED);
                 DrawCircle(0, 0, worldSize+20, LIGHTGRAY);
 
@@ -123,11 +107,8 @@
             EndDrawing();
             //----------------------------------------------------------------------------------
         }
-        // De-Initialization
-        //FREE()--¿?
-        //--------------------------------------------------------------------------------------
-        CloseWindow();        // Close window and OpenGL context
-        //--------------------------------------------------------------------------------------
+
+        CloseWindow();
         return 0;
     }
 

@@ -68,7 +68,7 @@ void *getValue(Node *focusNode){
     return focusNode->value;
 }
 
-
+//agrega posicion a la cabeza de la lista y recorre todas las demas
 void updateListaP(List* posiciones,Vector2 mouse){
     Node* focus=posiciones->head;
     Vector2 *vec=focus->value;
