@@ -35,13 +35,13 @@ Vector2 getPosicionGusano(List* gusano,int index); | Recibe lista dinámica del 
 void inicializarBloque(Vector2 initialPositions[valorInicial], List* gusano); | Recibe un arreglo de posiciones y lista dinámica del cuerpo de gusano original, inicializa bloque del cuerpo del gusano con las posiciones del arreglo, color random y radioInicial. 
 void inicializarPosiciones(List* posiciones,Vector2 initialPositions[valorInicial],Vector2 pInicial);| Inicializa posiciones para gusano original.
 void inicializarFakeGusanos(List* fakeGusanos[],List* posicionesFakeGusanos[],Vector2 randomPos[nGusanos][valorInicial]);| Inicializa cuerpo de gusanos I.A. y sus posiciones con listas dinámicas.
-Vector2 mouseMovement(Vector2 mouse, List* posiciones);  |
-void checkBoundaries(List* posiciones, List* gusano, int* play);  |
-void updateGusano(List* gusano,List* posiciones);  |
-Vector2 updatePosFakeGusano(List* posiciones, Vector2* target);  |
-void checkCollisionGusanos(List* gusano, List* posiciones, List* fakeGusanos[], List* fakeGusanosPos[],int* play,int* count,Vector2 foodPosTodo[]);  |
-void fakeGusanoFollowFood(List* fakeGusanos,Vector2 randomPosTodo[],Vector2 randomPosCentro[],Vector2* target);  |
-void fakeGusanoAvoidGusanos(List* fakeGusanos[],List* fakeGusano, Vector2* target,int i, List* gusano,int* flag);  |
+Vector2 mouseMovement(Vector2 mouse, List* posiciones);  |Función que permite que el gusano siga la dirección del mouse.
+void checkBoundaries(List* posiciones, List* gusano, int* play);  | Si el gusano tiene colisión con los limites del wordlSize el gusano muere, se reincia partida.
+void updateGusano(List* gusano,List* posiciones);  | Función que actualiza las posiciónes que el mouse debe de seguir.
+Vector2 updatePosFakeGusano(List* posiciones, Vector2* target);  | Función que permite los movimientos de gusanos de IA.
+void checkCollisionGusanos(List* gusano, List* posiciones, List* fakeGusanos[], List* fakeGusanosPos[],int* play,int* count,Vector2 foodPosTodo[]);  | Función que revisa si hay algún tipo de colisión, ya sea entre gusanos de IA, o del gusano con uno de IA.
+void fakeGusanoFollowFood(List* fakeGusanos,Vector2 randomPosTodo[],Vector2 randomPosCentro[],Vector2* target);  | Función que se encarga que un gusano de IA busque comida cercana
+void fakeGusanoAvoidGusanos(List* fakeGusanos[],List* fakeGusano, Vector2* target,int i, List* gusano,int* flag);  | Función que se encarga de que un gusano de IA evite colisionar con otro gusano a partir de un cambio de posición
 
 
 
